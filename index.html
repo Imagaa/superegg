@@ -1083,8 +1083,47 @@
           animation: 150,
           ghostClass: 'sortable-ghost',
           onEnd: function (evt) {
+            // 1. Pindahkan elemen yang digeser ke index barunya
             const movedItem = finalOrderedRoute.splice(evt.oldIndex, 1)[0];
             finalOrderedRoute.splice(evt.newIndex, 0, movedItem);
+            
+            // 2. Cek apakah ada Titik Akhir (End Point) yang dikunci oleh user dari Dropdown
+            const endSelectVal = document.getElementById('rute-end-select').value;
+            let endPoint = null;
+            
+            // 3. Pecah rute: "Terkunci" (dari atas sampai titik drop) dan "Sisa" (titik di bawah drop)
+            let lockedRoute = finalOrderedRoute.slice(0, evt.newIndex + 1);
+            let unvisited = finalOrderedRoute.slice(evt.newIndex + 1);
+            
+            // 4. Jika ada End Point, cabut End Point dari daftar "Sisa" agar tidak ikut dikalkulasi di tengah jalan
+            if (endSelectVal !== "AUTO" && unvisited.length > 0) {
+              let endTokoName = selectedStoresToRoute[parseInt(endSelectVal)].nama;
+              let endIdx = unvisited.findIndex(t => t.nama === endTokoName);
+              if (endIdx > -1) {
+                endPoint = unvisited.splice(endIdx, 1)[0];
+              }
+            }
+
+            // 5. Kalkulasi Ulang (Nearest Neighbor) khusus untuk daftar "Sisa"
+            let newOptimizedTail = [];
+            let currentLoc = lockedRoute[lockedRoute.length - 1]; // Jangkar: Titik yang baru saja di-drop
+            
+            while(unvisited.length > 0) {
+              let nearestIdx = 0; let minDist = Infinity;
+              for(let i=0; i<unvisited.length; i++) {
+                let d = hitungJarakWaktu(currentLoc.lat, currentLoc.lng, unvisited[i].lat, unvisited[i].lng).mentah;
+                if(d < minDist) { minDist = d; nearestIdx = i; }
+              }
+              let nextPoint = unvisited.splice(nearestIdx, 1)[0];
+              newOptimizedTail.push(nextPoint);
+              currentLoc = nextPoint;
+            }
+
+            // 6. Jahit kembali: [Rute Terkunci] + [Sisa yang Dioptimalkan] + [End Point]
+            finalOrderedRoute = [...lockedRoute, ...newOptimizedTail];
+            if (endPoint) finalOrderedRoute.push(endPoint);
+
+            // 7. Render ulang peta dengan garis yang sudah rapi
             renderListAndMap(); 
           },
         });
