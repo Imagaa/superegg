@@ -1085,7 +1085,10 @@
               <span class="store-name">${index + 1}. ${toko.nama}</span>
               <span class="store-dist">Jarak: ${distTeks}</span>
             </div>
-            <div class="sector-badge" style="background:${sColor}">Sektor ${sectorNum + 1}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="sector-badge" style="background:${sColor}">Sektor ${sectorNum + 1}</div>
+              <button onclick="hapusTokoDariRute(${index})" style="background: var(--danger); color: white; width: 28px; height: 28px; padding: 0; margin: 0; border-radius: 6px; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">❌</button>
+            </div>
           `;
           listContainer.appendChild(li);
 
@@ -1100,6 +1103,68 @@
         if(mapPoints.length > 1) {
           previewPolyline = L.polyline(mapPoints, {color: '#1F2937', weight: 3, dashArray: '5, 10'}).addTo(previewMap);
           previewMap.fitBounds(previewPolyline.getBounds(), {padding: [30,30]});
+        }
+      }
+
+      // FUNGSI BARU: MENGHAPUS TOKO DARI DAFTAR VISUALISASI JALUR
+      function hapusTokoDariRute(index) {
+        const tokoTarget = finalOrderedRoute[index];
+        if(!confirm(`Keluarkan "${tokoTarget.nama}" dari rencana rute hari ini?`)) return;
+
+        const startSelect = document.getElementById('rute-start-select');
+        const endSelect = document.getElementById('rute-end-select');
+
+        // Cek Edge Case: Jika toko yang dihapus adalah Start Point aktif
+        if (startSelect.value !== "GPS" && selectedStoresToRoute[parseInt(startSelect.value)].nama === tokoTarget.nama) {
+          alert("Toko ini sedang Anda gunakan sebagai titik MULAI (Start). Dropdown Start akan dikembalikan ke posisi GPS default.");
+          if (userGpsForRoute) startSelect.value = "GPS";
+          else startSelect.value = "0";
+        }
+
+        // Cek Edge Case: Jika toko yang dihapus adalah End Point aktif
+        if (endSelect.value !== "AUTO" && selectedStoresToRoute[parseInt(endSelect.value)].nama === tokoTarget.nama) {
+          endSelect.value = "AUTO";
+        }
+
+        // 1. Keluarkan dari data urutan aktif visual
+        finalOrderedRoute.splice(index, 1);
+
+        // 2. Keluarkan juga dari master pool data pemilihan rute agar sinkron saat dropdown me-refresh
+        let masterIdx = selectedStoresToRoute.findIndex(t => t.nama === tokoTarget.nama);
+        if (masterIdx > -1) selectedStoresToRoute.splice(masterIdx, 1);
+
+        // 3. Bangun kembali dropdown konfigurasi di atas tanpa merusak urutan sisa toko
+        startSelect.innerHTML = "";
+        if (userGpsForRoute) startSelect.appendChild(new Option(userGpsForRoute.nama, "GPS"));
+        
+        selectedStoresToRoute.forEach((toko, idx) => {
+          startSelect.appendChild(new Option(toko.nama, idx));
+          // Jika toko ini sama dengan toko start yang baru di-fallback, arahkan kursor select kesini
+          if(startSelect.value !== "GPS" && finalOrderedRoute[0] && finalOrderedRoute[0].nama === toko.nama) {
+             startSelect.value = idx;
+          }
+        });
+
+        // 4. Gambar ulang peta & hubungkan langsung garis rute yang bolong
+        renderListAndMap();
+
+        // 5. Trigger update teks dropdown End secara background
+        const startVal = startSelect.value;
+        let startPoint = (startVal === "GPS" && userGpsForRoute) ? userGpsForRoute : selectedStoresToRoute[parseInt(startVal)];
+        if (startPoint) {
+          let storesWithDist = selectedStoresToRoute.map((toko, idx) => {
+            let calc = hitungJarakWaktu(startPoint.lat, startPoint.lng, toko.lat, toko.lng);
+            return { ...toko, originalIdx: idx, jarak: calc.mentah, labelDist: `${calc.km}km / ${calc.menit}mnt` };
+          });
+          storesWithDist.sort((a, b) => b.jarak - a.jarak);
+          let currentEndVal = endSelect.value;
+          endSelect.innerHTML = '<option value="AUTO">-- Biarkan Sistem Memilih --</option>';
+          storesWithDist.forEach(toko => {
+             if(toko.nama !== startPoint.nama) {
+               endSelect.appendChild(new Option(`${toko.nama} (${toko.labelDist})`, toko.originalIdx));
+             }
+          });
+          if(currentEndVal && currentEndVal !== "") endSelect.value = currentEndVal;
         }
 
         if(sortableInstance) sortableInstance.destroy();
