@@ -87,7 +87,22 @@
       .modal-icon.warning { background-color: #FEF3C7; color: var(--warning); }
       .modal-title { margin: 0 0 8px; font-size: 18px; color: var(--text-main); }
       .modal-text { margin: 0 0 20px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+      
+      /* CSS TAMBAHAN UNTUK VISUAL ROUTING */
+      #route-map-preview { width: 100%; height: 280px; border-radius: 12px; border: 1.5px solid #E5E7EB; margin-bottom: 15px; z-index: 1;}
+      .route-config-box { background: #FFF; border: 1px solid #E5E7EB; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
+      .sortable-list { list-style: none; padding: 0; margin: 0; max-height: 40vh; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: 12px; background: #F9FAFB; }
+      .sortable-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #E5E7EB; background: #FFF; font-size: 14px; gap: 10px; cursor: grab; }
+      .sortable-item:last-child { border-bottom: none; }
+      .sortable-item:active { cursor: grabbing; }
+      .sortable-ghost { opacity: 0.4; background-color: #EEF2FF; }
+      .drag-handle { color: #9CA3AF; font-size: 18px; cursor: grab; padding-right: 5px; }
+      .store-info { flex: 1; display: flex; flex-direction: column; }
+      .store-name { font-weight: 700; color: #1F2937; }
+      .store-dist { font-size: 11px; color: var(--primary); font-weight: 600; }
+      .sector-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #FFF; font-weight: bold; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   </head>
   <body>
 
@@ -140,7 +155,29 @@
         <button class="btn-back" onclick="bukaSetupRute()">⬅ Kembali</button>
         <h3 style="margin-top:0;">Pilih Toko</h3>
         <div id="rute-checkbox-container" style="max-height: 350px; overflow-y: auto; margin-bottom:15px; border:1px solid #E5E7EB; padding:12px; border-radius:12px;"></div>
-        <button class="btn-success" onclick="prosesAlgoritmaRute()">🚀 Mulai Rute Tercepat</button>
+        <button class="btn-primary" onclick="siapkanVisualRute()">🗺️ Lanjut: Atur Jalur di Peta</button>
+      </div>
+
+      <div id="routing-visual-section" class="hidden">
+        <button class="btn-back" onclick="kembaliKePilihToko()">⬅ Kembali Pilih Toko</button>
+        
+        <div class="route-config-box">
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>📍 Mulai dari (Start):</label>
+            <select id="rute-start-select" onchange="hitungUlangOtomatis()"></select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>🏁 Berakhir di (End):</label>
+            <select id="rute-end-select" onchange="hitungUlangOtomatis()"></select>
+          </div>
+        </div>
+
+        <div id="route-map-preview"></div>
+        
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">↕ Tekan dan geser nama toko di bawah untuk mengubah urutan secara manual.</p>
+        <ul id="sortable-route-list" class="sortable-list"></ul>
+        
+        <button class="btn-success" style="margin-top:15px;" onclick="kunciRuteFinal()">🚀 Kunci & Mulai Navigasi</button>
       </div>
 
       <div id="routing-dashboard-section" class="hidden">
@@ -294,14 +331,13 @@
       }
       function tutupAlert() { document.getElementById('custom-alert').classList.remove('show'); }
 
-      // KODE BARU (Lebih ringkas dan aman):
+      // KODE BARU SECURE PROXY API VERCEL
       async function jalankanFetchAPI(actionName, payloadData = {}) {
         try {
-          // Sekarang frontend hanya menembak endpoint Vercel lokal kita sendiri
           const response = await fetch('/api/proxy', {
             method: "POST",
             headers: {
-              "Content-Type": "application/json" // Beri tahu Vercel bahwa ini adalah JSON
+              "Content-Type": "application/json" 
             },
             body: JSON.stringify({ action: actionName, data: payloadData })
           });
@@ -434,7 +470,7 @@
 
             let marker = L.marker([item.lat, item.lng], {icon: customIcon}).addTo(map);
             marker.bindTooltip(item.nama, { permanent: true, direction: 'right', className: 'map-label', offset: [8, 0] });
-            let googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`;
+            let googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${item.lat},${item.lng}&travelmode=driving&dir_action=navigate`;
             
             marker.bindPopup(`
               <div style="text-align:center;">
@@ -703,19 +739,16 @@
         ctx.fillText(`WAKTU : ${currentTimestamp}`, 15, startY);
         
         if (currentMode === 'laporan') {
-          // val1:toko, val2:sisa, val3:setoran, val4:statusTeks, val5:keterangan
           ctx.fillText(`TOKO  : ${val1}`, 15, startY + lineGap);
           ctx.fillText(`SISA  : ${val2} btr | UANG: ${val3}`, 15, startY + (lineGap * 2));
           ctx.fillText(`STAT  : ${val4}`, 15, startY + (lineGap * 3));
           ctx.fillText(`KET   : ${val5}`, 15, startY + (lineGap * 4));
         } else if (currentMode === 'titik') {
-          // val1:nama, val5:keterangan, val6:jumlahAwal
           ctx.fillText(`TITIK BARU : ${val1}`, 15, startY + lineGap);
           ctx.fillText(`DROP AWAL  : ${val6} butir`, 15, startY + (lineGap * 2));
           ctx.fillText(`LATITUDE   : ${geoLat}`, 15, startY + (lineGap * 3));
           ctx.fillText(`LONGITUDE  : ${geoLong}`, 15, startY + (lineGap * 4));
         } else if (currentMode === 'customer') {
-          // val1:nama, val2:wa, val3:setoran, val4:jumlah, val5:keterangan
           ctx.fillText(`PEMBELI END USER : ${val1}`, 15, startY + lineGap);
           ctx.fillText(`NO WA : ${val2}`, 15, startY + (lineGap * 2));
           ctx.fillText(`BELI  : ${val4} btr | UANG: ${val3}`, 15, startY + (lineGap * 3));
@@ -797,6 +830,7 @@
         document.getElementById('map-menu-section').classList.add('hidden');
         document.getElementById('routing-setup-section').classList.add('hidden');
         document.getElementById('routing-selection-section').classList.add('hidden');
+        document.getElementById('routing-visual-section').classList.add('hidden');
         document.getElementById('routing-dashboard-section').classList.add('hidden');
         
         document.getElementById('home-section').classList.remove('hidden');
@@ -873,32 +907,192 @@
           });
       }
 
-      // Rumus Haversine (Garis Lurus Bumi)
-      function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      // --- LOGIKA PERHITUNGAN HAVERSINE, DROPDOWN DINAMIS & DRAG DROP RUTE BARU ---
+      let selectedStoresToRoute = [];
+      let finalOrderedRoute = [];
+      let previewMap = null;
+      let previewPolyline = null;
+      let sortableInstance = null;
+      let userGpsForRoute = null;
+
+      function kembaliKePilihToko() {
+        document.getElementById('routing-visual-section').classList.add('hidden');
+        document.getElementById('routing-selection-section').classList.remove('hidden');
       }
 
-      function prosesAlgoritmaRute() {
+      function hitungJarakWaktu(lat1, lon1, lat2, lon2) {
+        if(!lat1 || !lon1 || !lat2 || !lon2) return { km: 0, menit: 0, mentah: 0 };
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        let jarakLurus = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        let jarakAspal = jarakLurus * 1.35; 
+        let waktuMenit = Math.round((jarakAspal / 25) * 60); 
+        return { km: jarakAspal.toFixed(1), menit: waktuMenit, mentah: jarakAspal };
+      }
+
+      function siapkanVisualRute() {
         const checkboxes = document.querySelectorAll('#rute-checkbox-container input[type="checkbox"]:checked');
         if(checkboxes.length === 0) return tampilAlert('warning', 'Peringatan', 'Pilih minimal 1 toko!');
         
-        let unvisited = []; checkboxes.forEach(chk => unvisited.push(tempRoutingData[chk.value]));
-        let route = []; let current = unvisited.shift(); route.push(current);
+        selectedStoresToRoute = [];
+        checkboxes.forEach(chk => selectedStoresToRoute.push(tempRoutingData[chk.value]));
+        
+        document.getElementById('routing-selection-section').classList.add('hidden');
+        document.getElementById('routing-visual-section').classList.remove('hidden');
+        
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        document.getElementById('loading-text').textContent = "Mengunci GPS Anda...";
 
-        // Nearest Neighbor Sort (Mengurai titik terdekat secara estafet)
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => { 
+              userGpsForRoute = { nama: "📍 Lokasi Saya Saat Ini", lat: pos.coords.latitude, lng: pos.coords.longitude, isGps: true };
+              renderDropdownsConfig();
+            },
+            (err) => { 
+              userGpsForRoute = null; renderDropdownsConfig();
+            }, { timeout: 7000 }
+          );
+        } else {
+          userGpsForRoute = null; renderDropdownsConfig();
+        }
+      }
+
+      function renderDropdownsConfig() {
+        document.getElementById('loading-overlay').classList.add('hidden');
+        const startSelect = document.getElementById('rute-start-select');
+        startSelect.innerHTML = "";
+        
+        if (userGpsForRoute) {
+          startSelect.appendChild(new Option(userGpsForRoute.nama, "GPS"));
+        }
+        selectedStoresToRoute.forEach((toko, idx) => {
+          startSelect.appendChild(new Option(toko.nama, idx));
+        });
+
+        if(!previewMap) {
+          previewMap = L.map('route-map-preview').setView([-7.5666, 110.8166], 13);
+          L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').addTo(previewMap);
+        }
+        
+        hitungUlangOtomatis();
+      }
+
+      function hitungUlangOtomatis() {
+        const startVal = document.getElementById('rute-start-select').value;
+        let startPoint = (startVal === "GPS" && userGpsForRoute) ? userGpsForRoute : selectedStoresToRoute[parseInt(startVal)];
+        
+        let storesWithDist = selectedStoresToRoute.map((toko, idx) => {
+          let calc = hitungJarakWaktu(startPoint.lat, startPoint.lng, toko.lat, toko.lng);
+          return { ...toko, originalIdx: idx, jarak: calc.mentah, labelDist: `${calc.km}km / ${calc.menit}mnt` };
+        });
+        
+        storesWithDist.sort((a, b) => b.jarak - a.jarak); 
+        
+        const endSelect = document.getElementById('rute-end-select');
+        let currentEndVal = endSelect.value;
+        endSelect.innerHTML = '<option value="AUTO">-- Biarkan Sistem Memilih --</option>';
+        storesWithDist.forEach(toko => {
+           if(toko.nama !== startPoint.nama) {
+             endSelect.appendChild(new Option(`${toko.nama} (${toko.labelDist})`, toko.originalIdx));
+           }
+        });
+        if(currentEndVal && currentEndVal !== "") endSelect.value = currentEndVal;
+
+        let unvisited = [...selectedStoresToRoute];
+        finalOrderedRoute = [];
+        
+        let endPoint = null;
+        if(endSelect.value !== "AUTO") {
+           let endIdx = unvisited.findIndex(t => t.nama === selectedStoresToRoute[endSelect.value].nama);
+           if(endIdx > -1) endPoint = unvisited.splice(endIdx, 1)[0];
+        }
+
+        if(startVal !== "GPS") {
+           let startIdx = unvisited.findIndex(t => t.nama === startPoint.nama);
+           if(startIdx > -1) {
+             let first = unvisited.splice(startIdx, 1)[0];
+             finalOrderedRoute.push(first);
+           }
+        }
+
+        let currentLoc = startPoint;
         while(unvisited.length > 0) {
           let nearestIdx = 0; let minDist = Infinity;
           for(let i=0; i<unvisited.length; i++) {
-            let d = getDistance(current.lat, current.lng, unvisited[i].lat, unvisited[i].lng);
+            let d = hitungJarakWaktu(currentLoc.lat, currentLoc.lng, unvisited[i].lat, unvisited[i].lng).mentah;
             if(d < minDist) { minDist = d; nearestIdx = i; }
           }
-          current = unvisited.splice(nearestIdx, 1)[0]; route.push(current);
+          let nextPoint = unvisited.splice(nearestIdx, 1)[0];
+          finalOrderedRoute.push(nextPoint);
+          currentLoc = nextPoint;
         }
-        
-        localStorage.setItem('eggo_rute_aktif', JSON.stringify({ sales: activeSalesRute, route: route }));
-        document.getElementById('routing-selection-section').classList.add('hidden');
+
+        if(endPoint) finalOrderedRoute.push(endPoint);
+
+        renderListAndMap();
+      }
+
+      function renderListAndMap() {
+        const listContainer = document.getElementById('sortable-route-list');
+        listContainer.innerHTML = "";
+        const sectorColors = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6"];
+
+        let mapPoints = [];
+        previewMap.eachLayer((layer) => { if (layer instanceof L.Marker || layer instanceof L.Polyline) previewMap.removeLayer(layer); });
+
+        let prevPoint = (userGpsForRoute && document.getElementById('rute-start-select').value === "GPS") ? userGpsForRoute : null;
+
+        finalOrderedRoute.forEach((toko, index) => {
+          let sectorNum = Math.floor(index / 10);
+          let sColor = sectorColors[sectorNum % sectorColors.length];
+          
+          let calc = prevPoint ? hitungJarakWaktu(prevPoint.lat, prevPoint.lng, toko.lat, toko.lng) : {km:0, menit:0};
+          let distTeks = prevPoint ? `+${calc.km}km (±${calc.menit} mnt)` : `Titik Pertama`;
+          
+          let li = document.createElement('li');
+          li.className = 'sortable-item';
+          li.setAttribute('data-id', toko.nama);
+          li.innerHTML = `
+            <div class="drag-handle">☰</div>
+            <div class="store-info">
+              <span class="store-name">${index + 1}. ${toko.nama}</span>
+              <span class="store-dist">Jarak: ${distTeks}</span>
+            </div>
+            <div class="sector-badge" style="background:${sColor}">Sektor ${sectorNum + 1}</div>
+          `;
+          listContainer.appendChild(li);
+
+          let iconHtml = `<div style="background:${sColor}; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.3);">${index+1}</div>`;
+          let customIcon = L.divIcon({ className: '', html: iconHtml, iconSize: [24,24], iconAnchor: [12,12] });
+          L.marker([toko.lat, toko.lng], {icon: customIcon}).addTo(previewMap).bindTooltip(toko.nama, {direction:'top'});
+          
+          mapPoints.push([toko.lat, toko.lng]);
+          prevPoint = toko;
+        });
+
+        if(mapPoints.length > 1) {
+          previewPolyline = L.polyline(mapPoints, {color: '#1F2937', weight: 3, dashArray: '5, 10'}).addTo(previewMap);
+          previewMap.fitBounds(previewPolyline.getBounds(), {padding: [30,30]});
+        }
+
+        if(sortableInstance) sortableInstance.destroy();
+        sortableInstance = new Sortable(listContainer, {
+          handle: '.drag-handle',
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          onEnd: function (evt) {
+            const movedItem = finalOrderedRoute.splice(evt.oldIndex, 1)[0];
+            finalOrderedRoute.splice(evt.newIndex, 0, movedItem);
+            renderListAndMap(); 
+          },
+        });
+      }
+
+      function kunciRuteFinal() {
+        localStorage.setItem('eggo_rute_aktif', JSON.stringify({ sales: activeSalesRute, route: finalOrderedRoute }));
+        document.getElementById('routing-visual-section').classList.add('hidden');
         cekRuteAktif();
       }
 
@@ -913,18 +1107,22 @@
           const container = document.getElementById('rute-aktif-container');
           container.innerHTML = `<p style="text-align:center; font-size:13px; margin-bottom:20px;">Penugasan: <strong>${data.sales}</strong></p>`;
           
-          // Pecah rute maksimal per 10 titik untuk Limit Google Maps URL
           const chunkSize = 10;
           for (let i = 0; i < data.route.length; i += chunkSize) {
             const chunk = data.route.slice(i, i + chunkSize);
-            let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${chunk[0].lat},${chunk[0].lng}&destination=${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
+            
+            // Menggunakan format Maps resmi untuk memaksa masuk Mode Navigasi Turn-by-Turn
+            let origin = `${chunk[0].lat},${chunk[0].lng}`;
+            let dest = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
+            let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving&dir_action=navigate`;
+            
             if(chunk.length > 2) {
               let waypoints = chunk.slice(1, chunk.length-1).map(t => `${t.lat},${t.lng}`).join('|');
               urlMaps += `&waypoints=${waypoints}`;
             }
 
             let chunkHtml = `<div class="route-card"><div class="route-title">Sektor ${Math.floor(i/chunkSize)+1} <span class="badge">${chunk.length} Titik</span></div>`;
-            chunkHtml += `<a href="${urlMaps}" target="_blank" style="text-decoration:none;"><button class="btn-primary" style="margin-bottom:15px; padding:10px;">🗺️ Buka Navigasi Maps</button></a>`;
+            chunkHtml += `<a href="${urlMaps}" target="_blank" style="text-decoration:none;"><button class="btn-primary" style="margin-bottom:15px; padding:10px;">🚗 Buka Navigasi (Sektor ${Math.floor(i/chunkSize)+1})</button></a>`;
             
             chunk.forEach((toko, chunkIdx) => {
               let globalIdx = i + chunkIdx;
