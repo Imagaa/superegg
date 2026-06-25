@@ -114,6 +114,7 @@
   </head>
   <body>
 
+    <!-- Modal Alert Bawaan (Custom) -->
     <div id="custom-alert" class="modal-overlay">
       <div class="modal-content">
         <div id="alert-icon" class="modal-icon"></div>
@@ -123,6 +124,7 @@
       </div>
     </div>
 
+    <!-- Modal Confirm Baru (Custom) -->
     <div id="custom-confirm" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-icon warning">?</div>
@@ -183,6 +185,13 @@
         <h3 style="margin-top:0;">Pilih Toko</h3>
         <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px;">Peta Sebaran Toko yang Belum Lapor:</p>
         <div id="selection-map-preview" style="width: 100%; height: 230px; border-radius: 12px; border: 1.5px solid #E5E7EB; margin-bottom: 15px; z-index: 1;"></div>
+        
+        <!-- FITUR BARU: Pencarian dan Tombol Pilih Semua -->
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <input type="text" id="search-rute-toko" placeholder="Cari nama toko..." onkeyup="filterCheckboxRute()" style="flex: 1; margin: 0; padding: 10px; font-size: 13px;">
+          <button type="button" id="btn-toggle-semua-toko" class="btn-secondary" style="width: 110px; margin: 0; padding: 10px; font-size: 12px;" onclick="toggleSemuaTokoRute()">Hapus Semua</button>
+        </div>
+
         <div id="rute-checkbox-container" style="max-height: 250px; overflow-y: auto; margin-bottom:15px; border:1px solid #E5E7EB; padding:12px; border-radius:12px;"></div>
         <button class="btn-primary" onclick="siapkanVisualRute()">🗺️ Lanjut: Atur Jalur di Peta</button>
       </div>
@@ -444,7 +453,6 @@
           list.classList.add('show'); 
         });
         
-        // Membersihkan input jika tidak dipilih dari daftar (Mencegah ketikan asal)
         input.addEventListener('blur', () => {
           setTimeout(() => {
             let data = dropdownData[idPrefix] || [];
@@ -458,14 +466,12 @@
         });
       }
 
-      // Tutup semua list dropdown jika klik di luar
       document.addEventListener('click', (e) => {
         document.querySelectorAll('.custom-select-list').forEach(list => {
           list.classList.remove('show');
         });
       });
 
-      // INISIALISASI SEMUA DROPDOWN & RUTE AKTIF SAAT APLIKASI DIBUKA
       document.addEventListener("DOMContentLoaded", () => { 
         cekRuteAktif(); 
         
@@ -1021,6 +1027,12 @@
               const container = document.getElementById('rute-checkbox-container');
               container.innerHTML = "";
               
+              // Reset Fitur Search dan Toggle Semua Toko
+              const searchInp = document.getElementById('search-rute-toko');
+              if(searchInp) searchInp.value = "";
+              const btnToggle = document.getElementById('btn-toggle-semua-toko');
+              if(btnToggle) { btnToggle.textContent = "Hapus Semua"; btnToggle.className = "btn-secondary"; }
+
               if(!selectionMap) {
                 selectionMap = L.map('selection-map-preview').setView([-7.5666, 110.8166], 13);
                 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').addTo(selectionMap);
@@ -1030,7 +1042,7 @@
 
               res.data.forEach((toko, idx) => {
                 let stokCetak = (toko.stokLalu !== "") ? toko.stokLalu : 0;
-                container.innerHTML += `<div class="chk-group"><input type="checkbox" id="chk-${idx}" value="${idx}" checked> <label for="chk-${idx}" style="margin:0; font-weight:normal; color:#1F2937;">${toko.nama} <br><span style="font-size:11px; color:#6B7280;">Stok Lalu: ${stokCetak} butir</span></label></div>`;
+                container.innerHTML += `<div class="chk-group"><input type="checkbox" id="chk-${idx}" value="${idx}" checked onchange="handleManualCheckRute()"> <label for="chk-${idx}" style="margin:0; font-weight:normal; color:#1F2937;">${toko.nama} <br><span style="font-size:11px; color:#6B7280;">Stok Lalu: ${stokCetak} butir</span></label></div>`;
                 
                 let marker = L.marker([toko.lat, toko.lng]).addTo(selectionMap);
                 marker.bindTooltip((idx+1) + ". " + toko.nama, { permanent: false, direction: 'top' });
@@ -1050,6 +1062,55 @@
             document.getElementById('loading-overlay').classList.add('hidden');
             tampilAlert('error', 'Koneksi Terputus', 'Gagal menarik data rute.');
           });
+      }
+
+      function toggleSemuaTokoRute() {
+        const btn = document.getElementById('btn-toggle-semua-toko');
+        const checkboxes = document.querySelectorAll('#rute-checkbox-container input[type="checkbox"]');
+        
+        let isCheckAll = btn.textContent === "Pilih Semua";
+        
+        checkboxes.forEach(chk => {
+          // Terapkan aksi hanya pada list yang tidak disembunyikan oleh kolom pencarian
+          const parentGroup = chk.closest('.chk-group');
+          if(parentGroup && parentGroup.style.display !== 'none') {
+            chk.checked = isCheckAll;
+          }
+        });
+        
+        if (isCheckAll) {
+          btn.textContent = "Hapus Semua";
+          btn.className = "btn-secondary";
+        } else {
+          btn.textContent = "Pilih Semua";
+          btn.className = "btn-info";
+        }
+      }
+
+      function handleManualCheckRute() {
+        const checked = document.querySelectorAll('#rute-checkbox-container input[type="checkbox"]:checked');
+        const btn = document.getElementById('btn-toggle-semua-toko');
+        
+        if(checked.length === 0) {
+          btn.textContent = "Pilih Semua";
+          btn.className = "btn-info";
+        } else {
+          btn.textContent = "Hapus Semua";
+          btn.className = "btn-secondary";
+        }
+      }
+
+      function filterCheckboxRute() {
+        const query = document.getElementById('search-rute-toko').value.toLowerCase();
+        const groups = document.querySelectorAll('#rute-checkbox-container .chk-group');
+        groups.forEach(group => {
+          const label = group.querySelector('label').textContent.toLowerCase();
+          if (label.includes(query)) {
+            group.style.display = 'flex';
+          } else {
+            group.style.display = 'none';
+          }
+        });
       }
 
       // ==================================================
@@ -1291,7 +1352,6 @@
             const startVal = document.getElementById('rute-start-val').value;
             const endVal = document.getElementById('rute-end-val').value;
 
-            // Cek Edge Case: Penghapusan Titik Jangkar
             if (startVal !== "GPS" && selectedStoresToRoute[parseInt(startVal)] && selectedStoresToRoute[parseInt(startVal)].nama === tokoTarget.nama) {
               tampilAlert('warning', 'Info', 'Toko ini sedang Anda gunakan sebagai titik MULAI (Start). Dropdown Start akan dikembalikan ke posisi GPS default.');
               document.getElementById('rute-start-val').value = "GPS";
@@ -1302,14 +1362,11 @@
               document.getElementById('rute-end-input').value = "-- Biarkan Sistem Memilih --";
             }
 
-            // 1. Hapus dari urutan visual
             finalOrderedRoute.splice(index, 1);
 
-            // 2. Hapus dari master data
             let masterIdx = selectedStoresToRoute.findIndex(t => t.nama === tokoTarget.nama);
             if (masterIdx > -1) selectedStoresToRoute.splice(masterIdx, 1);
 
-            // 3. Bangun ulang dropdown start
             let startArr = [];
             if (userGpsForRoute) startArr.push({label: userGpsForRoute.nama, value: "GPS"});
             selectedStoresToRoute.forEach((toko, idx) => {
@@ -1317,7 +1374,6 @@
             });
             dropdownData['rute-start'] = startArr;
 
-            // Pastikan nilai dropdown start tidak ngawur jika geser index
             let currentStartVal = document.getElementById('rute-start-val').value;
             if(currentStartVal !== "GPS" && finalOrderedRoute[0]) {
                let newStartIdx = startArr.findIndex(s => s.label === finalOrderedRoute[0].nama);
@@ -1329,7 +1385,6 @@
 
             renderListAndMap();
 
-            // 4. Update dropdown End secara background
             const newStartVal = document.getElementById('rute-start-val').value;
             let startPoint = (newStartVal === "GPS" && userGpsForRoute) ? userGpsForRoute : selectedStoresToRoute[parseInt(newStartVal)];
             if (startPoint) {
@@ -1402,7 +1457,6 @@
         document.getElementById('routing-dashboard-section').classList.add('hidden');
         currentMode = "laporan"; document.getElementById('laporan-section').classList.remove('hidden');
         
-        // Mem-Bypass Input Manual ke Teks Toko Rute
         document.getElementById('laporan-sales-val').value = saved.sales;
         document.getElementById('laporan-sales-input').value = saved.sales;
         document.getElementById('form-lanjutan-laporan').classList.remove('hidden');
