@@ -439,8 +439,9 @@ function sinkronisasiFotoLama() {
 }
 function getRoutingDataInternal(payload) {
   const targetSales = String(payload.salesName).trim().toLowerCase();
+  const isSemuaSales = (targetSales === 'semua');
   
-  // Jika parameter pencarian standar rute harian biasa (tanpa filter tanggal custom), gunakan Cache
+  // Jika parameter pencarian standar rute harian biasa, gunakan Cache
   const isDefaultFilter = (!payload.startDate && !payload.endDate);
   const cache = CacheService.getScriptCache();
   const cacheKey = 'routing_cache_' + targetSales;
@@ -488,7 +489,8 @@ function getRoutingDataInternal(payload) {
       if (tglTransaksi < startDate || tglTransaksi > endDate) isDateValid = false;
     }
     
-    if (statusBayar === 'belum' && picPengiriman === targetSales && tokoPengiriman !== "" && isDateValid) {
+    // Perubahan di baris ini: mengizinkan tarikan data jika filter "Semua" diaktifkan
+    if (statusBayar === 'belum' && (isSemuaSales || picPengiriman === targetSales) && tokoPengiriman !== "" && isDateValid) {
       let coords = masterCoords.get(tokoPengiriman);
       if (coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
         validStores.set(tokoPengiriman, { 
@@ -504,7 +506,6 @@ function getRoutingDataInternal(payload) {
   let resultArr = Array.from(validStores.values()).sort((a, b) => a.nama.localeCompare(b.nama));
   if (resultArr.length === 0) return { success: false, message: "Tidak ada data tagihan/rute untuk rentang kriteria ini." };
   
-  // Simpan rute default sales ke cache selama 15 menit (900 detik)
   if (isDefaultFilter) {
     cache.put(cacheKey, JSON.stringify(resultArr), 900);
   }

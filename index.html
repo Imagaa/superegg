@@ -154,7 +154,9 @@
       <div id="routing-selection-section" class="hidden">
         <button class="btn-back" onclick="bukaSetupRute()">⬅ Kembali</button>
         <h3 style="margin-top:0;">Pilih Toko</h3>
-        <div id="rute-checkbox-container" style="max-height: 350px; overflow-y: auto; margin-bottom:15px; border:1px solid #E5E7EB; padding:12px; border-radius:12px;"></div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px;">Peta Sebaran Toko yang Belum Lapor:</p>
+        <div id="selection-map-preview" style="width: 100%; height: 230px; border-radius: 12px; border: 1.5px solid #E5E7EB; margin-bottom: 15px; z-index: 1;"></div>
+        <div id="rute-checkbox-container" style="max-height: 250px; overflow-y: auto; margin-bottom:15px; border:1px solid #E5E7EB; padding:12px; border-radius:12px;"></div>
         <button class="btn-primary" onclick="siapkanVisualRute()">🗺️ Lanjut: Atur Jalur di Peta</button>
       </div>
 
@@ -469,7 +471,8 @@
             });
 
             let marker = L.marker([item.lat, item.lng], {icon: customIcon}).addTo(map);
-            marker.bindTooltip(item.nama, { permanent: true, direction: 'right', className: 'map-label', offset: [8, 0] });
+            // permanent dibuat false agar nama muncul hanya saat pin disentuh/diklik (Sangat meringankan kinerja HP)
+            marker.bindTooltip(item.nama, { permanent: false, direction: 'top', className: 'map-label', offset: [0, -5] });
             let googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${item.lat},${item.lng}&travelmode=driving&dir_action=navigate`;
             
             marker.bindPopup(`
@@ -818,20 +821,12 @@
       function resetAndGoHome() {
         if (locationWatchId) { navigator.geolocation.clearWatch(locationWatchId); locationWatchId = null; }
 
-        document.getElementById('laporan-section').classList.add('hidden');
-        document.getElementById('titik-baru-section').classList.add('hidden');
-        document.getElementById('customer-section').classList.add('hidden');
-        document.getElementById('peta-section').classList.add('hidden');
-        document.getElementById('konfirmasi-section').classList.add('hidden');
-        document.getElementById('result-container').classList.add('hidden');
-        document.getElementById('form-lanjutan-laporan').classList.add('hidden');
-        document.getElementById('form-lanjutan-titik').classList.add('hidden');
-        document.getElementById('form-lanjutan-customer').classList.add('hidden');
-        document.getElementById('map-menu-section').classList.add('hidden');
-        document.getElementById('routing-setup-section').classList.add('hidden');
-        document.getElementById('routing-selection-section').classList.add('hidden');
-        document.getElementById('routing-visual-section').classList.add('hidden');
-        document.getElementById('routing-dashboard-section').classList.add('hidden');
+        // Sembunyikan semua section secara paksa
+        const sectionsToHide = ['laporan-section', 'titik-baru-section', 'customer-section', 'peta-section', 'konfirmasi-section', 'result-container', 'form-lanjutan-laporan', 'form-lanjutan-titik', 'form-lanjutan-customer', 'map-menu-section', 'routing-setup-section', 'routing-selection-section', 'routing-visual-section', 'routing-dashboard-section'];
+        sectionsToHide.forEach(id => {
+          let el = document.getElementById(id);
+          if(el) el.classList.add('hidden');
+        });
         
         document.getElementById('home-section').classList.remove('hidden');
         
@@ -843,7 +838,12 @@
         document.getElementById('cust-nama').value = ""; document.getElementById('cust-wa').value = ""; document.getElementById('cust-jumlah').value = ""; 
         document.getElementById('cust-setoran').value = ""; document.getElementById('cust-keterangan').value = "";
         
+        // PEMBERSIHAN EKSTREM AGAR DROPDOWN TIDAK NYANGKUT
+        document.getElementById('toko-custom-list').innerHTML = "";
+        document.getElementById('toko-custom-list').classList.remove('show');
+        storeDataArray = [];
         stokLaluAktif = 0; 
+        
         document.getElementById('sales-dropdown').value = ""; document.getElementById('sales-titik-baru').value = ""; document.getElementById('sales-customer').value = "";
         document.getElementById('peta-pic-dropdown').value = "Semua"; document.getElementById('peta-toko-dropdown').value = "Semua";
       }
@@ -867,13 +867,15 @@
         document.getElementById('home-section').classList.remove('hidden');
       }
       
+      let selectionMap = null; // Variabel penampung peta pemilihan
+
       function bukaSetupRute() {
         document.getElementById('map-menu-section').classList.add('hidden');
         document.getElementById('routing-setup-section').classList.remove('hidden');
         const dropdown = document.getElementById('rute-sales-dropdown');
         dropdown.innerHTML = '<option value="">Memuat data...</option>';
         jalankanFetchAPI('getSalesList').then(res => {
-          dropdown.innerHTML = '<option value="">-- Pilih Sales --</option>';
+          dropdown.innerHTML = '<option value="">-- Pilih Sales --</option><option value="Semua">🌟 SEMUA SALES (Gabungan)</option>';
           res.forEach(s => dropdown.appendChild(new Option(s, s)));
         });
       }
@@ -885,7 +887,7 @@
         if(!sales) return tampilAlert('warning', 'Peringatan', 'Pilih PIC Sales terlebih dahulu!');
         
         document.getElementById('loading-overlay').classList.remove('hidden');
-        document.getElementById('loading-text').textContent = "Mencari Titik...";
+        document.getElementById('loading-text').textContent = "Mencari Titik & Render Peta...";
         
         jalankanFetchAPI('getRoutingData', { salesName: sales, startDate: start, endDate: end })
           .then(res => {
@@ -894,12 +896,35 @@
               tempRoutingData = res.data; activeSalesRute = sales;
               const container = document.getElementById('rute-checkbox-container');
               container.innerHTML = "";
+              
+              // Inisialisasi Peta Pemilihan Toko
+              if(!selectionMap) {
+                selectionMap = L.map('selection-map-preview').setView([-7.5666, 110.8166], 13);
+                L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').addTo(selectionMap);
+              }
+              selectionMap.eachLayer((layer) => { if (!!layer.toGeoJSON) selectionMap.removeLayer(layer); });
+              let bounds = [];
+
               res.data.forEach((toko, idx) => {
                 let stokCetak = (toko.stokLalu !== "") ? toko.stokLalu : 0;
-                container.innerHTML += `<div class="chk-group"><input type="checkbox" id="chk-${idx}" value="${idx}"> <label for="chk-${idx}" style="margin:0; font-weight:normal; color:#1F2937;">${toko.nama} <br><span style="font-size:11px; color:#6B7280;">Stok Lalu: ${stokCetak} butir</span></label></div>`;
+                // Checkbox defaultnya di-checklist semua agar mempermudah sales
+                container.innerHTML += `<div class="chk-group"><input type="checkbox" id="chk-${idx}" value="${idx}" checked> <label for="chk-${idx}" style="margin:0; font-weight:normal; color:#1F2937;">${toko.nama} <br><span style="font-size:11px; color:#6B7280;">Stok Lalu: ${stokCetak} butir</span></label></div>`;
+                
+                // Tempel marker ke Peta Pemilihan
+                let marker = L.marker([toko.lat, toko.lng]).addTo(selectionMap);
+                marker.bindTooltip((idx+1) + ". " + toko.nama, { permanent: false, direction: 'top' });
+                bounds.push([toko.lat, toko.lng]);
               });
+
               document.getElementById('routing-setup-section').classList.add('hidden');
               document.getElementById('routing-selection-section').classList.remove('hidden');
+              
+              // Tunda render peta sedikit (fix bug leaflet map area abu-abu saat di hidden div)
+              setTimeout(() => { 
+                selectionMap.invalidateSize(); 
+                if(bounds.length > 0) selectionMap.fitBounds(bounds, {padding: [20,20], maxZoom: 16});
+              }, 300);
+
             } else { tampilAlert('error', 'Gagal', res.message); }
           }).catch(e => {
             document.getElementById('loading-overlay').classList.add('hidden');
