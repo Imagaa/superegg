@@ -38,14 +38,21 @@
 
       .form-group { margin-bottom: 16px; text-align: left; }
       label { font-weight: 600; font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; }
-      select, input, textarea { width: 100%; padding: 12px 14px; font-size: 15px; box-sizing: border-box; border: 1.5px solid #E5E7EB; border-radius: 10px; background-color: #F9FAFB; transition: border-color 0.2s; font-family: inherit; }
-      select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary); background-color: #FFF; }
+      input, textarea { width: 100%; padding: 12px 14px; font-size: 15px; box-sizing: border-box; border: 1.5px solid #E5E7EB; border-radius: 10px; background-color: #F9FAFB; transition: border-color 0.2s; font-family: inherit; }
+      input:focus, textarea:focus { outline: none; border-color: var(--primary); background-color: #FFF; }
       .hidden { display: none !important; }
       
+      /* KOMPONEN CUSTOM DROPDOWN (PENGGANTI SELECT) */
       .custom-select-wrapper { position: relative; width: 100%; }
-      .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #E5E7EB; border-radius: 10px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); z-index: 99; max-height: 220px; overflow-y: auto; list-style: none; padding: 0; margin: 5px 0 0; display: none; }
+      .custom-select-input { 
+        background: #FFF url('data:image/svg+xml;utf8,<svg fill="%239CA3AF" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 14px center; 
+        background-size: 18px; 
+        cursor: text; 
+        padding-right: 40px !important; 
+      }
+      .custom-select-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #E5E7EB; border-radius: 10px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); z-index: 1000; max-height: 220px; overflow-y: auto; list-style: none; padding: 0; margin: 5px 0 0; display: none; }
       .custom-select-list.show { display: block; }
-      .custom-select-list li { padding: 12px 14px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #F3F4F6; }
+      .custom-select-list li { padding: 12px 14px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #F3F4F6; text-align: left; }
       .custom-select-list li:hover { background-color: var(--primary); color: white; }
       .custom-select-list li.no-result { color: var(--danger); cursor: not-allowed; background: white; }
 
@@ -77,11 +84,12 @@
       .spinner { border: 4px solid #E5E7EB; border-top: 4px solid var(--primary); border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin-bottom: 15px; }
       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       #loading-text { color: var(--text-main); font-weight: 700; margin: 0; }
+      
       .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
       .modal-overlay.show { opacity: 1; visibility: visible; }
-      .modal-content { background: white; width: 85%; max-width: 340px; border-radius: 16px; padding: 24px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; }
+      .modal-content { background: white; width: 85%; max-width: 340px; border-radius: 16px; padding: 24px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
       .modal-overlay.show .modal-content { transform: translateY(0); }
-      .modal-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px; }
+      .modal-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px; font-weight: bold; }
       .modal-icon.error { background-color: #FEE2E2; color: var(--danger); }
       .modal-icon.success { background-color: #D1FAE5; color: var(--success); }
       .modal-icon.warning { background-color: #FEF3C7; color: var(--warning); }
@@ -91,12 +99,12 @@
       /* CSS TAMBAHAN UNTUK VISUAL ROUTING */
       #route-map-preview { width: 100%; height: 280px; border-radius: 12px; border: 1.5px solid #E5E7EB; margin-bottom: 15px; z-index: 1;}
       .route-config-box { background: #FFF; border: 1px solid #E5E7EB; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
-      .sortable-list { list-style: none; padding: 0; margin: 0; max-height: 40vh; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: 12px; background: #F9FAFB; }
-      .sortable-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #E5E7EB; background: #FFF; font-size: 14px; gap: 10px; cursor: grab; }
+      .sortable-list { list-style: none; padding: 0; margin: 0; max-height: 40vh; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: 12px; background: #F9FAFB; touch-action: pan-y; }
+      .sortable-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #E5E7EB; background: #FFF; font-size: 14px; gap: 10px; }
       .sortable-item:last-child { border-bottom: none; }
-      .sortable-item:active { cursor: grabbing; }
       .sortable-ghost { opacity: 0.4; background-color: #EEF2FF; }
-      .drag-handle { color: #9CA3AF; font-size: 18px; cursor: grab; padding-right: 5px; }
+      .drag-handle { color: #9CA3AF; font-size: 22px; cursor: grab; padding: 10px 15px 10px 5px; touch-action: none; margin-left: -5px; }
+      .drag-handle:active { cursor: grabbing; }
       .store-info { flex: 1; display: flex; flex-direction: column; }
       .store-name { font-weight: 700; color: #1F2937; }
       .store-dist { font-size: 11px; color: var(--primary); font-weight: 600; }
@@ -112,6 +120,18 @@
         <h3 id="alert-title" class="modal-title">Info</h3>
         <p id="alert-text" class="modal-text">Pesan</p>
         <button onclick="tutupAlert()" class="btn-primary" id="alert-btn">Mengerti</button>
+      </div>
+    </div>
+
+    <div id="custom-confirm" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-icon warning">?</div>
+        <h3 id="confirm-title" class="modal-title">Konfirmasi</h3>
+        <p id="confirm-text" class="modal-text">Apakah Anda yakin?</p>
+        <div class="dual-btn">
+          <button onclick="tutupConfirm()" class="btn-secondary">Batal</button>
+          <button id="confirm-btn-yes" class="btn-danger">Ya, Lanjutkan</button>
+        </div>
       </div>
     </div>
 
@@ -147,7 +167,14 @@
         <h3 style="margin-top:0;">Setup Rute</h3>
         <div class="form-group"><label>Tanggal Awal (Opsional):</label><input type="date" id="rute-start-date"></div>
         <div class="form-group"><label>Tanggal Akhir (Opsional):</label><input type="date" id="rute-end-date"></div>
-        <div class="form-group"><label>PIC Sales:</label><select id="rute-sales-dropdown"><option value="">Memuat...</option></select></div>
+        <div class="form-group">
+          <label>PIC Sales:</label>
+          <div class="custom-select-wrapper">
+            <input type="text" id="rute-sales-input" class="custom-select-input" placeholder="Memuat..." autocomplete="off">
+            <input type="hidden" id="rute-sales-val">
+            <ul id="rute-sales-list" class="custom-select-list"></ul>
+          </div>
+        </div>
         <button class="btn-primary" onclick="tarikDataRute()">Cari Toko</button>
       </div>
 
@@ -166,11 +193,19 @@
         <div class="route-config-box">
           <div class="form-group" style="margin-bottom:8px;">
             <label>📍 Mulai dari (Start):</label>
-            <select id="rute-start-select" onchange="hitungUlangOtomatis()"></select>
+            <div class="custom-select-wrapper">
+              <input type="text" id="rute-start-input" class="custom-select-input" placeholder="Memuat..." autocomplete="off">
+              <input type="hidden" id="rute-start-val">
+              <ul id="rute-start-list" class="custom-select-list"></ul>
+            </div>
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>🏁 Berakhir di (End):</label>
-            <select id="rute-end-select" onchange="hitungUlangOtomatis()"></select>
+            <div class="custom-select-wrapper">
+              <input type="text" id="rute-end-input" class="custom-select-input" placeholder="Memuat..." autocomplete="off">
+              <input type="hidden" id="rute-end-val">
+              <ul id="rute-end-list" class="custom-select-list"></ul>
+            </div>
           </div>
         </div>
 
@@ -193,15 +228,19 @@
         <button class="btn-small-outline" onclick="fetchMapData(true)">🔄 Sinkronkan Data Baru (Refresh)</button>
         <div class="form-group">
           <label>Pilih PIC Sales:</label>
-          <select id="peta-pic-dropdown" onchange="handleMapPicChange()">
-            <option value="Semua">Memuat data...</option>
-          </select>
+          <div class="custom-select-wrapper">
+            <input type="text" id="peta-pic-input" class="custom-select-input" placeholder="Memuat data..." autocomplete="off">
+            <input type="hidden" id="peta-pic-val">
+            <ul id="peta-pic-list" class="custom-select-list"></ul>
+          </div>
         </div>
         <div class="form-group">
           <label>Cari Toko Spesifik:</label>
-          <select id="peta-toko-dropdown" onchange="renderMarkers()">
-            <option value="Semua">-- Semua Toko --</option>
-          </select>
+          <div class="custom-select-wrapper">
+            <input type="text" id="peta-toko-input" class="custom-select-input" placeholder="Memuat data..." autocomplete="off">
+            <input type="hidden" id="peta-toko-val">
+            <ul id="peta-toko-list" class="custom-select-list"></ul>
+          </div>
         </div>
         <div id="map-container"></div>
       </div>
@@ -210,25 +249,30 @@
         <button class="btn-back" onclick="resetAndGoHome()">⬅ Kembali ke Menu</button>
         <div class="form-group">
           <label>PIC Sales:</label>
-          <select id="sales-dropdown" onchange="handleSalesSelection()">
-            <option value="">Memuat data...</option>
-          </select>
+          <div class="custom-select-wrapper">
+            <input type="text" id="laporan-sales-input" class="custom-select-input" placeholder="Memuat data..." autocomplete="off">
+            <input type="hidden" id="laporan-sales-val">
+            <ul id="laporan-sales-list" class="custom-select-list"></ul>
+          </div>
         </div>
         <div id="form-lanjutan-laporan" class="hidden">
-          <div class="form-group custom-select-wrapper" id="toko-dropdown-container">
+          <div class="form-group">
             <label>Nama Toko:</label>
-            <input type="text" id="toko-search" placeholder="Ketik nama toko..." autocomplete="off" onkeyup="filterCustomSelect()" onclick="toggleCustomSelect()">
-            <ul id="toko-custom-list" class="custom-select-list"></ul>
-            <input type="hidden" id="toko-input"> 
+            <div class="custom-select-wrapper">
+              <input type="text" id="laporan-toko-input" class="custom-select-input" placeholder="Ketik nama toko..." autocomplete="off">
+              <input type="hidden" id="laporan-toko-val">
+              <ul id="laporan-toko-list" class="custom-select-list"></ul>
+            </div>
           </div>
           <div class="form-group"><label id="label-sisa-telur">Sisa Telur (Butir):</label><input type="number" id="sisa-telur" placeholder="0" oninput="kalkulasiSetoranOtomatis()"></div>
           <div class="form-group"><label>Total Setoran (Rp):</label><input type="text" inputmode="numeric" id="total-setoran" placeholder="0" oninput="formatRupiahInput(this)"></div>
-          <div class="form-group"><label>Status:</label>
-            <select id="status-dropdown" onchange="handleStatusChange()">
-              <option value="">-- Pilih --</option>
-              <option value="Restock">Restock</option>
-              <option value="Stop">Stop</option>
-            </select>
+          <div class="form-group">
+            <label>Status:</label>
+            <div class="custom-select-wrapper">
+              <input type="text" id="laporan-status-input" class="custom-select-input" placeholder="-- Pilih Status --" autocomplete="off">
+              <input type="hidden" id="laporan-status-val">
+              <ul id="laporan-status-list" class="custom-select-list"></ul>
+            </div>
           </div>
           <div class="form-group hidden" id="input-restock-container"><label>Jumlah Restock (Butir):</label><input type="number" id="jumlah-restock" placeholder="0"></div>
           <div class="form-group"><label>Keterangan:</label><textarea id="keterangan" rows="2" placeholder="Catatan tambahan..."></textarea></div>
@@ -241,11 +285,11 @@
         <button class="btn-back" onclick="resetAndGoHome()">⬅ Kembali ke Menu</button>
         <div class="form-group">
           <label>PIC Sales:</label>
-          <select id="sales-titik-baru" onchange="handlePicTitikBaru()">
-            <option value="">-- Pilih Nama --</option>
-            <option value="Arya">Arya</option>
-            <option value="Kiting">Kiting</option>
-          </select>
+          <div class="custom-select-wrapper">
+            <input type="text" id="titik-sales-input" class="custom-select-input" placeholder="Memuat data..." autocomplete="off">
+            <input type="hidden" id="titik-sales-val">
+            <ul id="titik-sales-list" class="custom-select-list"></ul>
+          </div>
         </div>
         <div id="form-lanjutan-titik" class="hidden">
           <div class="form-group"><label>Nama Warung:</label><input type="text" id="tb-nama" placeholder="Contoh: Ajwa Soto"></div>
@@ -263,11 +307,11 @@
         <button class="btn-back" onclick="resetAndGoHome()">⬅ Kembali ke Menu</button>
         <div class="form-group">
           <label>PIC Sales:</label>
-          <select id="sales-customer" onchange="handlePicCustomer()">
-            <option value="">-- Pilih Nama --</option>
-            <option value="Arya">Arya</option>
-            <option value="Kiting">Kiting</option>
-          </select>
+          <div class="custom-select-wrapper">
+            <input type="text" id="customer-sales-input" class="custom-select-input" placeholder="Memuat data..." autocomplete="off">
+            <input type="hidden" id="customer-sales-val">
+            <ul id="customer-sales-list" class="custom-select-list"></ul>
+          </div>
         </div>
         <div id="form-lanjutan-customer" class="hidden">
           <div class="form-group"><label>Nama Pembeli:</label><input type="text" id="cust-nama" placeholder="Contoh: Budi Susanto"></div>
@@ -314,6 +358,9 @@
       const colorPalette = ["#EF4444", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#14B8A6"];
       let picColorMap = {}; 
 
+      // ==========================================
+      // MODUL ALERTS DAN CONFIRM MODALS
+      // ==========================================
       function tampilAlert(tipe, judul, pesan, aksiSetelahTutup = null) {
         const modal = document.getElementById('custom-alert');
         const iconBox = document.getElementById('alert-icon');
@@ -333,21 +380,139 @@
       }
       function tutupAlert() { document.getElementById('custom-alert').classList.remove('show'); }
 
-      // KODE BARU SECURE PROXY API VERCEL
+      function tampilConfirm(judul, pesan, onConfirmYes) {
+        document.getElementById('confirm-title').textContent = judul;
+        document.getElementById('confirm-text').textContent = pesan;
+        
+        const btnYes = document.getElementById('confirm-btn-yes');
+        const newBtnYes = btnYes.cloneNode(true);
+        btnYes.parentNode.replaceChild(newBtnYes, btnYes);
+        
+        newBtnYes.onclick = function() {
+          if(onConfirmYes) onConfirmYes();
+          tutupConfirm();
+        };
+        document.getElementById('custom-confirm').classList.add('show');
+      }
+      function tutupConfirm() { document.getElementById('custom-confirm').classList.remove('show'); }
+
+      // ==========================================
+      // MODUL CUSTOM DROPDOWN (Ketik untuk Mencari)
+      // ==========================================
+      let dropdownData = {
+        'laporan-sales': [], 'laporan-toko': [], 'laporan-status': [],
+        'titik-sales': [], 'customer-sales': [],
+        'peta-pic': [], 'peta-toko': [],
+        'rute-sales': [], 'rute-start': [], 'rute-end': []
+      };
+
+      function initCustomDropdown(idPrefix, onSelect) {
+        const input = document.getElementById(idPrefix + '-input');
+        const hidden = document.getElementById(idPrefix + '-val');
+        const list = document.getElementById(idPrefix + '-list');
+        if(!input || !hidden || !list) return;
+
+        const render = (query) => {
+          list.innerHTML = "";
+          let data = dropdownData[idPrefix] || [];
+          let filtered = data.filter(d => d.label.toLowerCase().includes(query.toLowerCase()));
+          
+          if(filtered.length === 0) {
+            list.innerHTML = '<li class="no-result">Tidak ditemukan</li>';
+            return;
+          }
+          
+          filtered.forEach(d => {
+            let li = document.createElement('li');
+            li.innerHTML = d.extraText ? `<strong>${d.label}</strong><br><span style="font-size:11px;color:gray;">${d.extraText}</span>` : d.label;
+            li.onclick = (e) => {
+              e.stopPropagation();
+              input.value = d.label;
+              hidden.value = d.value;
+              list.classList.remove('show');
+              if(onSelect) onSelect(d.value, d);
+            };
+            list.appendChild(li);
+          });
+        };
+
+        input.addEventListener('focus', () => { render(input.value); list.classList.add('show'); });
+        input.addEventListener('click', (e) => { e.stopPropagation(); render(""); list.classList.add('show'); });
+        input.addEventListener('input', (e) => { 
+          hidden.value = ""; 
+          render(e.target.value); 
+          list.classList.add('show'); 
+        });
+        
+        // Membersihkan input jika tidak dipilih dari daftar (Mencegah ketikan asal)
+        input.addEventListener('blur', () => {
+          setTimeout(() => {
+            let data = dropdownData[idPrefix] || [];
+            let matched = data.find(d => String(d.value) === String(hidden.value));
+            if(matched && input.value !== matched.label) {
+                input.value = matched.label; 
+            } else if (!matched && input.value !== "Memuat data...") {
+                input.value = ""; 
+            }
+          }, 250); 
+        });
+      }
+
+      // Tutup semua list dropdown jika klik di luar
+      document.addEventListener('click', (e) => {
+        document.querySelectorAll('.custom-select-list').forEach(list => {
+          list.classList.remove('show');
+        });
+      });
+
+      // INISIALISASI SEMUA DROPDOWN & RUTE AKTIF SAAT APLIKASI DIBUKA
+      document.addEventListener("DOMContentLoaded", () => { 
+        cekRuteAktif(); 
+        
+        dropdownData['laporan-status'] = [ {label: "Restock", value: "Restock"}, {label: "Stop", value: "Stop"} ];
+
+        initCustomDropdown('laporan-sales', handleSalesSelection);
+        initCustomDropdown('laporan-toko', (val, item) => {
+            let tokoObj = item.dataObj;
+            let labelSisa = document.getElementById('label-sisa-telur');
+            const stok = (tokoObj.stokLalu !== undefined && tokoObj.stokLalu !== null) ? tokoObj.stokLalu : "";
+            stokLaluAktif = parseInt(stok, 10) || 0; 
+            if (stok !== "" && !isNaN(stok)) labelSisa.textContent = `Sisa Telur (Butir): (stok telur yang lalu : ${stok})`;
+            else labelSisa.textContent = "Sisa Telur (Butir):";
+        });
+        initCustomDropdown('laporan-status', (val) => {
+            if (val === 'Restock') document.getElementById('input-restock-container').classList.remove('hidden');
+            else { document.getElementById('input-restock-container').classList.add('hidden'); document.getElementById('jumlah-restock').value = ''; }
+        });
+        
+        initCustomDropdown('titik-sales', (val) => {
+            if(val) document.getElementById('form-lanjutan-titik').classList.remove('hidden'); 
+            else document.getElementById('form-lanjutan-titik').classList.add('hidden');
+        });
+        
+        initCustomDropdown('customer-sales', (val) => {
+            if(val) document.getElementById('form-lanjutan-customer').classList.remove('hidden'); 
+            else document.getElementById('form-lanjutan-customer').classList.add('hidden');
+        });
+        
+        initCustomDropdown('peta-pic', handleMapPicChange);
+        initCustomDropdown('peta-toko', renderMarkers);
+        initCustomDropdown('rute-sales');
+        initCustomDropdown('rute-start', hitungUlangOtomatis);
+        initCustomDropdown('rute-end', hitungUlangOtomatis);
+      });
+
+      // ==========================================
+      // FUNGSI API PROXY SERVER VERCEL
+      // ==========================================
       async function jalankanFetchAPI(actionName, payloadData = {}) {
         try {
           const response = await fetch('/api/proxy', {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json" 
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: actionName, data: payloadData })
           });
-          
-          if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-          }
-          
+          if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
           return await response.json();
         } catch (err) {
           console.error("API Error:", err);
@@ -355,7 +520,9 @@
         }
       }
 
-      // --- LOGIKA PETA (CACHE & LOKASI LIVE) ---
+      // ==========================================
+      // LOGIKA PETA (CACHE & LOKASI LIVE)
+      // ==========================================
       function bukaPetaLama() {
         document.getElementById('map-menu-section').classList.add('hidden');
         document.getElementById('peta-section').classList.remove('hidden');
@@ -405,21 +572,19 @@
       }
 
       function prosesDataPeta() {
-        const picDropdown = document.getElementById('peta-pic-dropdown');
-        const currentPicVal = picDropdown.value; 
-        
-        picDropdown.innerHTML = '<option value="Semua">-- Semua Sales --</option>';
         let picSet = new Set();
         globalMapData.forEach(item => { if(item.pic) picSet.add(item.pic); });
         
         let cIndex = 0;
+        let pData = [{label: "-- Semua Sales --", value: "Semua"}];
         Array.from(picSet).sort().forEach(p => {
-          picDropdown.appendChild(new Option(p, p));
+          pData.push({label: p, value: p});
           if(!picColorMap[p]) { picColorMap[p] = colorPalette[cIndex % colorPalette.length]; cIndex++; }
         });
         
-        if (currentPicVal && currentPicVal !== "Memuat data...") picDropdown.value = currentPicVal;
-        handleMapPicChange(); 
+        dropdownData['peta-pic'] = pData;
+        document.getElementById('peta-pic-input').placeholder = "-- Pilih Sales --";
+        handleMapPicChange("Semua"); 
       }
 
       function mulaiLacakLokasi() {
@@ -440,21 +605,30 @@
         }
       }
 
-      function handleMapPicChange() {
-        const selectedPic = document.getElementById('peta-pic-dropdown').value;
-        const tokoDropdown = document.getElementById('peta-toko-dropdown');
-        tokoDropdown.innerHTML = '<option value="Semua">-- Semua Toko --</option>';
+      function handleMapPicChange(picName = null) {
+        if (!picName || typeof picName !== 'string') picName = document.getElementById('peta-pic-val').value || "Semua";
+        
+        document.getElementById('peta-toko-input').value = "";
+        document.getElementById('peta-toko-val').value = "Semua";
         
         let filteredStores = globalMapData;
-        if (selectedPic !== "Semua") filteredStores = globalMapData.filter(item => item.pic === selectedPic);
+        if (picName !== "Semua" && picName !== "") {
+           filteredStores = globalMapData.filter(item => item.pic === picName);
+        }
         
-        filteredStores.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(item => { tokoDropdown.appendChild(new Option(item.nama, item.nama)); });
+        let tData = [{label: "-- Semua Toko --", value: "Semua"}];
+        filteredStores.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(item => { 
+            tData.push({label: item.nama, value: item.nama}); 
+        });
+        
+        dropdownData['peta-toko'] = tData;
+        document.getElementById('peta-toko-input').placeholder = "-- Semua Toko --";
         renderMarkers(); 
       }
 
       function renderMarkers() {
-        const filterPic = document.getElementById('peta-pic-dropdown').value;
-        const filterToko = document.getElementById('peta-toko-dropdown').value;
+        const filterPic = document.getElementById('peta-pic-val').value || "Semua";
+        const filterToko = document.getElementById('peta-toko-val').value || "Semua";
         
         markersList.forEach(m => map.removeLayer(m));
         markersList = [];
@@ -471,7 +645,6 @@
             });
 
             let marker = L.marker([item.lat, item.lng], {icon: customIcon}).addTo(map);
-            // permanent dibuat false agar nama muncul hanya saat pin disentuh/diklik (Sangat meringankan kinerja HP)
             marker.bindTooltip(item.nama, { permanent: false, direction: 'top', className: 'map-label', offset: [0, -5] });
             let googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${item.lat},${item.lng}&travelmode=driving&dir_action=navigate`;
             
@@ -489,118 +662,80 @@
         else map.setView([-7.5666, 110.8166], 13);
       }
 
-      // --- LOGIKA DROPDOWN TOKO ---
-      let storeDataArray = [];
-      function toggleCustomSelect() {
-        if(storeDataArray.length > 0 && !document.getElementById('toko-search').disabled) document.getElementById('toko-custom-list').classList.add('show');
-      }
-      
-      function filterCustomSelect() {
-        const searchInput = document.getElementById('toko-search').value.toLowerCase();
-        const listUL = document.getElementById('toko-custom-list');
-        listUL.innerHTML = "";
-        let hasResult = false;
-
-        storeDataArray.forEach(tokoObj => {
-          if(tokoObj.nama.toLowerCase().includes(searchInput)) {
-            hasResult = true; const li = document.createElement('li'); li.textContent = tokoObj.nama; li.onclick = () => selectTokoItem(tokoObj); listUL.appendChild(li);
-          }
+      // ==========================================
+      // MENU NAVIGATION & POPULASI DROPDOWN DINAMIS
+      // ==========================================
+      function fetchDanIsiSales(prefix, includeAll = false) {
+        document.getElementById(prefix + '-input').value = "Memuat data...";
+        jalankanFetchAPI('getSalesList').then(res => {
+            document.getElementById(prefix + '-input').value = "";
+            document.getElementById(prefix + '-input').placeholder = "-- Pilih Nama Sales --";
+            let d = res.map(s => ({label: s, value: s}));
+            if(includeAll) d.unshift({label: "🌟 SEMUA SALES (Gabungan)", value: "Semua"});
+            dropdownData[prefix] = d;
+        }).catch(err => {
+            document.getElementById(prefix + '-input').value = "";
+            document.getElementById(prefix + '-input').placeholder = "Gagal memuat";
+            tampilAlert('error', 'Koneksi Gagal', 'Gagal mengambil daftar sales.');
         });
-
-        if(!hasResult) { const li = document.createElement('li'); li.textContent = "Toko tidak ditemukan"; li.classList.add('no-result'); listUL.appendChild(li); }
-        listUL.classList.add('show');
       }
 
-      function selectTokoItem(tokoObj) {
-        document.getElementById('toko-search').value = tokoObj.nama;
-        document.getElementById('toko-input').value = tokoObj.nama; 
-        
-        let labelSisa = document.getElementById('label-sisa-telur');
-        if (!labelSisa) {
-          const inputSisa = document.getElementById('sisa-telur');
-          if (inputSisa && inputSisa.parentElement) labelSisa = inputSisa.parentElement.querySelector('label');
-        }
-        
-        const stok = (tokoObj.stokLalu !== undefined && tokoObj.stokLalu !== null) ? tokoObj.stokLalu : "";
-        stokLaluAktif = parseInt(stok, 10) || 0; 
-        
-        if (labelSisa) {
-          if (stok !== "" && !isNaN(stok)) labelSisa.textContent = `Sisa Telur (Butir): (stok telur yang lalu : ${stok})`;
-          else labelSisa.textContent = "Sisa Telur (Butir):";
-        }
-        document.getElementById('toko-custom-list').classList.remove('show');
-      }
-
-      document.addEventListener('click', function(event) {
-        const tokoDropdown = document.getElementById('toko-dropdown-container');
-        if (tokoDropdown && !tokoDropdown.contains(event.target)) {
-           const list = document.getElementById('toko-custom-list');
-           if(list) list.classList.remove('show');
-        }
-      });
-
-      // --- MENU NAVIGATION ---
       function bukaLaporan() {
         currentMode = "laporan"; document.getElementById('home-section').classList.add('hidden'); document.getElementById('laporan-section').classList.remove('hidden');
-        const dropdown = document.getElementById('sales-dropdown'); dropdown.innerHTML = '<option value="">Memuat data...</option>';
-        document.getElementById('loading-overlay').classList.remove('hidden'); document.getElementById('loading-text').textContent = "Menghubungkan Server...";
-        jalankanFetchAPI('getSalesList').then(res => {
-            document.getElementById('loading-overlay').classList.add('hidden');
-            dropdown.innerHTML = '<option value="">-- Pilih Nama Sales --</option>';
-            res.forEach(s => dropdown.appendChild(new Option(s, s)));
-          }).catch(err => {
-            document.getElementById('loading-overlay').classList.add('hidden'); tampilAlert('error', 'Koneksi Gagal', 'Gagal mengambil data.');
-          });
+        fetchDanIsiSales('laporan-sales');
       }
 
-      function bukaTitikBaru() { currentMode = "titik"; document.getElementById('home-section').classList.add('hidden'); document.getElementById('titik-baru-section').classList.remove('hidden'); }
-      function bukaCustomer() { currentMode = "customer"; document.getElementById('home-section').classList.add('hidden'); document.getElementById('customer-section').classList.remove('hidden'); }
+      function bukaTitikBaru() { 
+        currentMode = "titik"; document.getElementById('home-section').classList.add('hidden'); document.getElementById('titik-baru-section').classList.remove('hidden'); 
+        fetchDanIsiSales('titik-sales');
+      }
+      
+      function bukaCustomer() { 
+        currentMode = "customer"; document.getElementById('home-section').classList.add('hidden'); document.getElementById('customer-section').classList.remove('hidden'); 
+        fetchDanIsiSales('customer-sales');
+      }
 
-      function handleSalesSelection() {
-        const salesName = document.getElementById('sales-dropdown').value;
-        const tokoSearch = document.getElementById('toko-search'); const tokoHidden = document.getElementById('toko-input'); const listUL = document.getElementById('toko-custom-list');
+      function handleSalesSelection(salesName) {
+        const input = document.getElementById('laporan-toko-input'); 
+        const hidden = document.getElementById('laporan-toko-val');
         if (salesName) {
           document.getElementById('form-lanjutan-laporan').classList.remove('hidden'); document.getElementById('result-container').classList.add('hidden');
-          tokoSearch.value = ""; tokoHidden.value = ""; listUL.innerHTML = ""; tokoSearch.placeholder = "Mencari tagihan..."; tokoSearch.disabled = true; storeDataArray = [];
+          input.value = ""; hidden.value = ""; input.placeholder = "Mencari tagihan..."; input.disabled = true; 
+          dropdownData['laporan-toko'] = [];
           jalankanFetchAPI('getStoresBySales', { salesName: salesName }).then(storeList => {
-              if (storeList.length > 0 && typeof storeList[0] === 'string' && storeList[0].startsWith("Error:")) tokoSearch.placeholder = storeList[0];
-              else if (storeList.length === 0) tokoSearch.placeholder = "Tidak ada tagihan 'Belum'";
+              if (storeList.length > 0 && typeof storeList[0] === 'string' && storeList[0].startsWith("Error:")) input.placeholder = storeList[0];
+              else if (storeList.length === 0) input.placeholder = "Tidak ada tagihan 'Belum'";
               else {
-                 tokoSearch.disabled = false; tokoSearch.placeholder = "Ketik/Pilih nama toko..."; storeDataArray = storeList; filterCustomSelect(); listUL.classList.remove('show'); 
+                 input.disabled = false; input.placeholder = "Ketik/Pilih nama toko..."; 
+                 dropdownData['laporan-toko'] = storeList.map(t => ({label: t.nama, value: t.nama, dataObj: t})); 
               }
             }).catch(err => tampilAlert('error', 'Error API', 'Gagal memuat daftar toko.'));
         } else { document.getElementById('form-lanjutan-laporan').classList.add('hidden'); }
       }
 
-      function handlePicTitikBaru() {
-        if(document.getElementById('sales-titik-baru').value) document.getElementById('form-lanjutan-titik').classList.remove('hidden'); 
-        else document.getElementById('form-lanjutan-titik').classList.add('hidden');
-      }
-
-      function handlePicCustomer() {
-        if(document.getElementById('sales-customer').value) document.getElementById('form-lanjutan-customer').classList.remove('hidden'); 
-        else document.getElementById('form-lanjutan-customer').classList.add('hidden');
-      }
-
-      // --- TRIGGER KAMERA & VALIDASI ---
+      // ==========================================
+      // TRIGGER KAMERA & VALIDASI FORMULIR
+      // ==========================================
       function triggerKameraLaporan() {
-        const toko = document.getElementById('toko-input').value; const sisa = document.getElementById('sisa-telur').value;
-        const setoran = document.getElementById('total-setoran').value; const status = document.getElementById('status-dropdown').value;
+        const toko = document.getElementById('laporan-toko-val').value; const sisa = document.getElementById('sisa-telur').value;
+        const setoran = document.getElementById('total-setoran').value; const status = document.getElementById('laporan-status-val').value;
         if(!toko || !sisa || !setoran || !status) return tampilAlert('warning', 'Data Belum Lengkap', 'Harap lengkapi isian Nama Toko, Sisa Telur, Setoran, dan Status.');
         document.getElementById('input-kamera-laporan').click();
       }
 
       function triggerKameraTitik() {
+        const sales = document.getElementById('titik-sales-val').value;
         const nama = document.getElementById('tb-nama').value; const pemilik = document.getElementById('tb-pemilik').value;
         const hp = document.getElementById('tb-hp').value; const jumlahAwal = document.getElementById('tb-jumlah').value;
-        if(!nama || !pemilik || !hp || !jumlahAwal) return tampilAlert('warning', 'Data Belum Lengkap', 'Harap isi semua formulir pendaftaran.');
+        if(!sales || !nama || !pemilik || !hp || !jumlahAwal) return tampilAlert('warning', 'Data Belum Lengkap', 'Harap lengkapi Sales dan semua isian pendaftaran.');
         document.getElementById('input-kamera-titik').click();
       }
 
       function triggerKameraCustomer() {
+        const sales = document.getElementById('customer-sales-val').value;
         const nama = document.getElementById('cust-nama').value; const wa = document.getElementById('cust-wa').value;
         const jumlah = document.getElementById('cust-jumlah').value; const setoran = document.getElementById('cust-setoran').value;
-        if(!nama || !wa || !jumlah || !setoran) return tampilAlert('warning', 'Data Belum Lengkap', 'Harap isi Nama, WA, Jumlah Beli, dan Setoran.');
+        if(!sales || !nama || !wa || !jumlah || !setoran) return tampilAlert('warning', 'Data Belum Lengkap', 'Harap isi Sales, Nama, WA, Jumlah Beli, dan Setoran.');
         document.getElementById('input-kamera-customer').click();
       }
 
@@ -640,7 +775,6 @@
             );
           } else { document.getElementById('loading-overlay').classList.add('hidden'); tampilAlert('error', 'Tidak Mendukung', 'Browser Anda tidak mendukung GPS.'); }
         } else { 
-          // Mode Laporan dan Customer masuk kesini (Tanpa GPS Lock)
           eksekusiRender(); 
         }
       }
@@ -667,7 +801,6 @@
       function kalkulasiSetoranCustomer() {
         const inputJumlah = document.getElementById('cust-jumlah').value;
         const inputSetoran = document.getElementById('cust-setoran');
-        
         if (inputJumlah !== "") {
           let jumlah = parseInt(inputJumlah, 10) || 0;
           let estimasiSetoran = jumlah * 3500;
@@ -678,16 +811,14 @@
         }
       }
 
-      function handleStatusChange() {
-        const status = document.getElementById('status-dropdown').value;
-        if (status === 'Restock') document.getElementById('input-restock-container').classList.remove('hidden');
-        else { document.getElementById('input-restock-container').classList.add('hidden'); document.getElementById('jumlah-restock').value = ''; }
-      }
-
-      // --- KONFIRMASI REVIEW ---
+      // ==========================================
+      // KONFIRMASI REVIEW & WATERMARK KANVAS
+      // ==========================================
       function tampilkanKonfirmasiLaporan() {
-        const toko = document.getElementById('toko-input').value; const sisa = document.getElementById('sisa-telur').value;
-        const setoran = document.getElementById('total-setoran').value; const status = document.getElementById('status-dropdown').value;
+        const toko = document.getElementById('laporan-toko-input').value; // Mengambil Teks Nama untuk Preview
+        const sisa = document.getElementById('sisa-telur').value;
+        const setoran = document.getElementById('total-setoran').value; 
+        const status = document.getElementById('laporan-status-val').value;
         const restock = document.getElementById('jumlah-restock').value; let keterangan = document.getElementById('keterangan').value;
         
         let statusTeks = status; if(status === 'Restock') statusTeks += ` (${restock} butir)`; if(keterangan === "") keterangan = "-";
@@ -766,7 +897,9 @@
         else if(currentMode === 'customer') document.getElementById('form-lanjutan-customer').classList.remove('hidden');
       }
 
-      // --- PENGIRIMAN DATA KE SERVER ---
+      // ==========================================
+      // PENGIRIMAN DATA KE SERVER
+      // ==========================================
       function eksekusiKirim() {
         document.getElementById('loading-overlay').classList.remove('hidden');
         document.getElementById('loading-text').textContent = "Upload ke Server...";
@@ -775,16 +908,16 @@
 
         if (currentMode === 'laporan') {
           let setoranTeks = document.getElementById('total-setoran').value; let setoranMurni = parseInt(setoranTeks.replace(/[^0-9]/g, ''), 10) || 0;
-          let rStatus = document.getElementById('status-dropdown').value;
+          let rStatus = document.getElementById('laporan-status-val').value;
           let payload = {
-            sales: document.getElementById('sales-dropdown').value, toko: document.getElementById('toko-input').value, sisaTelur: document.getElementById('sisa-telur').value,
+            sales: document.getElementById('laporan-sales-val').value, toko: document.getElementById('laporan-toko-val').value, sisaTelur: document.getElementById('sisa-telur').value,
             setoranClean: setoranMurni, status: rStatus, jumlahRestock: (rStatus === 'Restock') ? parseInt(document.getElementById('jumlah-restock').value, 10) : 0,
             keterangan: document.getElementById('keterangan').value, timestamp: currentTimestamp, fotoBase64: fotoBase64
           };
           jalankanFetchAPI('submitLaporan', payload).then(handleSuccess).catch(handleFail);
         } else if (currentMode === 'titik') {
           let payload = {
-            pic: document.getElementById('sales-titik-baru').value, namaWarung: document.getElementById('tb-nama').value, pemilik: document.getElementById('tb-pemilik').value,
+            pic: document.getElementById('titik-sales-val').value, namaWarung: document.getElementById('tb-nama').value, pemilik: document.getElementById('tb-pemilik').value,
             hp: document.getElementById('tb-hp').value, jumlahAwal: parseInt(document.getElementById('tb-jumlah').value, 10),
             keterangan: document.getElementById('tb-keterangan').value, lat: geoLat, long: geoLong, timestamp: currentTimestamp, fotoBase64: fotoBase64
           };
@@ -792,7 +925,7 @@
         } else if (currentMode === 'customer') {
           let setoranTeks = document.getElementById('cust-setoran').value; let setoranMurni = parseInt(setoranTeks.replace(/[^0-9]/g, ''), 10) || 0;
           let payload = {
-            pic: document.getElementById('sales-customer').value, namaUser: document.getElementById('cust-nama').value, noWa: document.getElementById('cust-wa').value,
+            pic: document.getElementById('customer-sales-val').value, namaUser: document.getElementById('cust-nama').value, noWa: document.getElementById('cust-wa').value,
             jumlahBeli: parseInt(document.getElementById('cust-jumlah').value, 10), totalSetoran: setoranMurni, keterangan: document.getElementById('cust-keterangan').value,
             timestamp: currentTimestamp, fotoBase64: fotoBase64
           };
@@ -821,7 +954,7 @@
       function resetAndGoHome() {
         if (locationWatchId) { navigator.geolocation.clearWatch(locationWatchId); locationWatchId = null; }
 
-        // Sembunyikan semua section secara paksa
+        // Sembunyikan semua section secara paksa (Mencegah fitur tersangkut)
         const sectionsToHide = ['laporan-section', 'titik-baru-section', 'customer-section', 'peta-section', 'konfirmasi-section', 'result-container', 'form-lanjutan-laporan', 'form-lanjutan-titik', 'form-lanjutan-customer', 'map-menu-section', 'routing-setup-section', 'routing-selection-section', 'routing-visual-section', 'routing-dashboard-section'];
         sectionsToHide.forEach(id => {
           let el = document.getElementById(id);
@@ -830,22 +963,22 @@
         
         document.getElementById('home-section').classList.remove('hidden');
         
-        // Reset Inputs
-        document.getElementById('toko-search').value = ""; document.getElementById('toko-input').value = ""; document.getElementById('sisa-telur').value = "";
-        document.getElementById('label-sisa-telur').textContent = "Sisa Telur (Butir):"; document.getElementById('total-setoran').value = ""; document.getElementById('jumlah-restock').value = "";
-        document.getElementById('keterangan').value = ""; document.getElementById('tb-nama').value = ""; document.getElementById('tb-pemilik').value = ""; document.getElementById('tb-hp').value = "";
+        // Bersihkan Custom Select Inputs & Values
+        const prefixes = ['laporan-sales', 'laporan-toko', 'laporan-status', 'titik-sales', 'customer-sales', 'peta-pic', 'peta-toko', 'rute-sales', 'rute-start', 'rute-end'];
+        prefixes.forEach(p => {
+            let inp = document.getElementById(p + '-input'); let hid = document.getElementById(p + '-val');
+            if(inp) inp.value = ""; if(hid) hid.value = "";
+        });
+
+        // Reset Inputs Teks
+        document.getElementById('sisa-telur').value = ""; document.getElementById('label-sisa-telur').textContent = "Sisa Telur (Butir):"; 
+        document.getElementById('total-setoran').value = ""; document.getElementById('jumlah-restock').value = ""; document.getElementById('keterangan').value = ""; 
+        document.getElementById('tb-nama').value = ""; document.getElementById('tb-pemilik').value = ""; document.getElementById('tb-hp').value = "";
         document.getElementById('tb-jumlah').value = ""; document.getElementById('tb-keterangan').value = "";
         document.getElementById('cust-nama').value = ""; document.getElementById('cust-wa').value = ""; document.getElementById('cust-jumlah').value = ""; 
         document.getElementById('cust-setoran').value = ""; document.getElementById('cust-keterangan').value = "";
         
-        // PEMBERSIHAN EKSTREM AGAR DROPDOWN TIDAK NYANGKUT
-        document.getElementById('toko-custom-list').innerHTML = "";
-        document.getElementById('toko-custom-list').classList.remove('show');
-        storeDataArray = [];
         stokLaluAktif = 0; 
-        
-        document.getElementById('sales-dropdown').value = ""; document.getElementById('sales-titik-baru').value = ""; document.getElementById('sales-customer').value = "";
-        document.getElementById('peta-pic-dropdown').value = "Semua"; document.getElementById('peta-toko-dropdown').value = "Semua";
       }
 
       // ==================================================
@@ -854,9 +987,7 @@
       let tempRoutingData = [];
       let activeSalesRute = "";
       let targetLaporRute = ""; 
-
-      // Auto-Restore Rute Aktif saat aplikasi dibuka ulang
-      document.addEventListener("DOMContentLoaded", () => { cekRuteAktif(); });
+      let selectionMap = null; 
 
       function bukaMenuPeta() {
         document.getElementById('home-section').classList.add('hidden');
@@ -867,21 +998,14 @@
         document.getElementById('home-section').classList.remove('hidden');
       }
       
-      let selectionMap = null; // Variabel penampung peta pemilihan
-
       function bukaSetupRute() {
         document.getElementById('map-menu-section').classList.add('hidden');
         document.getElementById('routing-setup-section').classList.remove('hidden');
-        const dropdown = document.getElementById('rute-sales-dropdown');
-        dropdown.innerHTML = '<option value="">Memuat data...</option>';
-        jalankanFetchAPI('getSalesList').then(res => {
-          dropdown.innerHTML = '<option value="">-- Pilih Sales --</option><option value="Semua">🌟 SEMUA SALES (Gabungan)</option>';
-          res.forEach(s => dropdown.appendChild(new Option(s, s)));
-        });
+        fetchDanIsiSales('rute-sales', true);
       }
 
       function tarikDataRute() {
-        const sales = document.getElementById('rute-sales-dropdown').value;
+        const sales = document.getElementById('rute-sales-val').value;
         const start = document.getElementById('rute-start-date').value;
         const end = document.getElementById('rute-end-date').value;
         if(!sales) return tampilAlert('warning', 'Peringatan', 'Pilih PIC Sales terlebih dahulu!');
@@ -897,7 +1021,6 @@
               const container = document.getElementById('rute-checkbox-container');
               container.innerHTML = "";
               
-              // Inisialisasi Peta Pemilihan Toko
               if(!selectionMap) {
                 selectionMap = L.map('selection-map-preview').setView([-7.5666, 110.8166], 13);
                 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').addTo(selectionMap);
@@ -907,10 +1030,8 @@
 
               res.data.forEach((toko, idx) => {
                 let stokCetak = (toko.stokLalu !== "") ? toko.stokLalu : 0;
-                // Checkbox defaultnya di-checklist semua agar mempermudah sales
                 container.innerHTML += `<div class="chk-group"><input type="checkbox" id="chk-${idx}" value="${idx}" checked> <label for="chk-${idx}" style="margin:0; font-weight:normal; color:#1F2937;">${toko.nama} <br><span style="font-size:11px; color:#6B7280;">Stok Lalu: ${stokCetak} butir</span></label></div>`;
                 
-                // Tempel marker ke Peta Pemilihan
                 let marker = L.marker([toko.lat, toko.lng]).addTo(selectionMap);
                 marker.bindTooltip((idx+1) + ". " + toko.nama, { permanent: false, direction: 'top' });
                 bounds.push([toko.lat, toko.lng]);
@@ -919,7 +1040,6 @@
               document.getElementById('routing-setup-section').classList.add('hidden');
               document.getElementById('routing-selection-section').classList.remove('hidden');
               
-              // Tunda render peta sedikit (fix bug leaflet map area abu-abu saat di hidden div)
               setTimeout(() => { 
                 selectionMap.invalidateSize(); 
                 if(bounds.length > 0) selectionMap.fitBounds(bounds, {padding: [20,20], maxZoom: 16});
@@ -932,7 +1052,9 @@
           });
       }
 
-      // --- LOGIKA PERHITUNGAN HAVERSINE, DROPDOWN DINAMIS & DRAG DROP RUTE BARU ---
+      // ==================================================
+      // LOGIKA PERHITUNGAN HAVERSINE & VISUALISASI RUTE
+      // ==================================================
       let selectedStoresToRoute = [];
       let finalOrderedRoute = [];
       let previewMap = null;
@@ -965,7 +1087,6 @@
         
         document.getElementById('routing-selection-section').classList.add('hidden');
         document.getElementById('routing-visual-section').classList.remove('hidden');
-        
         document.getElementById('loading-overlay').classList.remove('hidden');
         document.getElementById('loading-text').textContent = "Mengunci GPS Anda...";
 
@@ -986,15 +1107,24 @@
 
       function renderDropdownsConfig() {
         document.getElementById('loading-overlay').classList.add('hidden');
-        const startSelect = document.getElementById('rute-start-select');
-        startSelect.innerHTML = "";
+        
+        let startArr = [];
+        if (userGpsForRoute) startArr.push({label: userGpsForRoute.nama, value: "GPS"});
+        selectedStoresToRoute.forEach((toko, idx) => {
+          startArr.push({label: toko.nama, value: idx.toString()});
+        });
+        dropdownData['rute-start'] = startArr;
         
         if (userGpsForRoute) {
-          startSelect.appendChild(new Option(userGpsForRoute.nama, "GPS"));
+            document.getElementById('rute-start-val').value = "GPS";
+            document.getElementById('rute-start-input').value = userGpsForRoute.nama;
+        } else if(selectedStoresToRoute.length > 0) {
+            document.getElementById('rute-start-val').value = "0";
+            document.getElementById('rute-start-input').value = selectedStoresToRoute[0].nama;
         }
-        selectedStoresToRoute.forEach((toko, idx) => {
-          startSelect.appendChild(new Option(toko.nama, idx));
-        });
+
+        document.getElementById('rute-end-val').value = "AUTO";
+        document.getElementById('rute-end-input').value = "-- Biarkan Sistem Memilih --";
 
         if(!previewMap) {
           previewMap = L.map('route-map-preview').setView([-7.5666, 110.8166], 13);
@@ -1005,8 +1135,11 @@
       }
 
       function hitungUlangOtomatis() {
-        const startVal = document.getElementById('rute-start-select').value;
+        const startVal = document.getElementById('rute-start-val').value;
+        if(startVal === "") return; 
+
         let startPoint = (startVal === "GPS" && userGpsForRoute) ? userGpsForRoute : selectedStoresToRoute[parseInt(startVal)];
+        if(!startPoint) return;
         
         let storesWithDist = selectedStoresToRoute.map((toko, idx) => {
           let calc = hitungJarakWaktu(startPoint.lat, startPoint.lng, toko.lat, toko.lng);
@@ -1015,22 +1148,22 @@
         
         storesWithDist.sort((a, b) => b.jarak - a.jarak); 
         
-        const endSelect = document.getElementById('rute-end-select');
-        let currentEndVal = endSelect.value;
-        endSelect.innerHTML = '<option value="AUTO">-- Biarkan Sistem Memilih --</option>';
+        let endArr = [{label: "-- Biarkan Sistem Memilih --", value: "AUTO"}];
         storesWithDist.forEach(toko => {
            if(toko.nama !== startPoint.nama) {
-             endSelect.appendChild(new Option(`${toko.nama} (${toko.labelDist})`, toko.originalIdx));
+             endArr.push({label: toko.nama, value: toko.originalIdx.toString(), extraText: toko.labelDist});
            }
         });
-        if(currentEndVal && currentEndVal !== "") endSelect.value = currentEndVal;
+        dropdownData['rute-end'] = endArr;
+
+        const endVal = document.getElementById('rute-end-val').value;
 
         let unvisited = [...selectedStoresToRoute];
         finalOrderedRoute = [];
         
         let endPoint = null;
-        if(endSelect.value !== "AUTO") {
-           let endIdx = unvisited.findIndex(t => t.nama === selectedStoresToRoute[endSelect.value].nama);
+        if(endVal !== "AUTO" && endVal !== "") {
+           let endIdx = unvisited.findIndex(t => t.nama === selectedStoresToRoute[parseInt(endVal)].nama);
            if(endIdx > -1) endPoint = unvisited.splice(endIdx, 1)[0];
         }
 
@@ -1067,7 +1200,7 @@
         let mapPoints = [];
         previewMap.eachLayer((layer) => { if (layer instanceof L.Marker || layer instanceof L.Polyline) previewMap.removeLayer(layer); });
 
-        let prevPoint = (userGpsForRoute && document.getElementById('rute-start-select').value === "GPS") ? userGpsForRoute : null;
+        let prevPoint = (userGpsForRoute && document.getElementById('rute-start-val').value === "GPS") ? userGpsForRoute : null;
 
         finalOrderedRoute.forEach((toko, index) => {
           let sectorNum = Math.floor(index / 10);
@@ -1104,89 +1237,25 @@
           previewPolyline = L.polyline(mapPoints, {color: '#1F2937', weight: 3, dashArray: '5, 10'}).addTo(previewMap);
           previewMap.fitBounds(previewPolyline.getBounds(), {padding: [30,30]});
         }
-      }
-
-      // FUNGSI BARU: MENGHAPUS TOKO DARI DAFTAR VISUALISASI JALUR
-      function hapusTokoDariRute(index) {
-        const tokoTarget = finalOrderedRoute[index];
-        if(!confirm(`Keluarkan "${tokoTarget.nama}" dari rencana rute hari ini?`)) return;
-
-        const startSelect = document.getElementById('rute-start-select');
-        const endSelect = document.getElementById('rute-end-select');
-
-        // Cek Edge Case: Jika toko yang dihapus adalah Start Point aktif
-        if (startSelect.value !== "GPS" && selectedStoresToRoute[parseInt(startSelect.value)].nama === tokoTarget.nama) {
-          alert("Toko ini sedang Anda gunakan sebagai titik MULAI (Start). Dropdown Start akan dikembalikan ke posisi GPS default.");
-          if (userGpsForRoute) startSelect.value = "GPS";
-          else startSelect.value = "0";
-        }
-
-        // Cek Edge Case: Jika toko yang dihapus adalah End Point aktif
-        if (endSelect.value !== "AUTO" && selectedStoresToRoute[parseInt(endSelect.value)].nama === tokoTarget.nama) {
-          endSelect.value = "AUTO";
-        }
-
-        // 1. Keluarkan dari data urutan aktif visual
-        finalOrderedRoute.splice(index, 1);
-
-        // 2. Keluarkan juga dari master pool data pemilihan rute agar sinkron saat dropdown me-refresh
-        let masterIdx = selectedStoresToRoute.findIndex(t => t.nama === tokoTarget.nama);
-        if (masterIdx > -1) selectedStoresToRoute.splice(masterIdx, 1);
-
-        // 3. Bangun kembali dropdown konfigurasi di atas tanpa merusak urutan sisa toko
-        startSelect.innerHTML = "";
-        if (userGpsForRoute) startSelect.appendChild(new Option(userGpsForRoute.nama, "GPS"));
-        
-        selectedStoresToRoute.forEach((toko, idx) => {
-          startSelect.appendChild(new Option(toko.nama, idx));
-          // Jika toko ini sama dengan toko start yang baru di-fallback, arahkan kursor select kesini
-          if(startSelect.value !== "GPS" && finalOrderedRoute[0] && finalOrderedRoute[0].nama === toko.nama) {
-             startSelect.value = idx;
-          }
-        });
-
-        // 4. Gambar ulang peta & hubungkan langsung garis rute yang bolong
-        renderListAndMap();
-
-        // 5. Trigger update teks dropdown End secara background
-        const startVal = startSelect.value;
-        let startPoint = (startVal === "GPS" && userGpsForRoute) ? userGpsForRoute : selectedStoresToRoute[parseInt(startVal)];
-        if (startPoint) {
-          let storesWithDist = selectedStoresToRoute.map((toko, idx) => {
-            let calc = hitungJarakWaktu(startPoint.lat, startPoint.lng, toko.lat, toko.lng);
-            return { ...toko, originalIdx: idx, jarak: calc.mentah, labelDist: `${calc.km}km / ${calc.menit}mnt` };
-          });
-          storesWithDist.sort((a, b) => b.jarak - a.jarak);
-          let currentEndVal = endSelect.value;
-          endSelect.innerHTML = '<option value="AUTO">-- Biarkan Sistem Memilih --</option>';
-          storesWithDist.forEach(toko => {
-             if(toko.nama !== startPoint.nama) {
-               endSelect.appendChild(new Option(`${toko.nama} (${toko.labelDist})`, toko.originalIdx));
-             }
-          });
-          if(currentEndVal && currentEndVal !== "") endSelect.value = currentEndVal;
-        }
 
         if(sortableInstance) sortableInstance.destroy();
         sortableInstance = new Sortable(listContainer, {
           handle: '.drag-handle',
           animation: 150,
           ghostClass: 'sortable-ghost',
+          delay: 100,             // Sensitivitas sentuhan mobile
+          delayOnTouchOnly: true, // Hanya berlaku delay di HP agar tidak bentrok dengan scroll
           onEnd: function (evt) {
-            // 1. Pindahkan elemen yang digeser ke index barunya
             const movedItem = finalOrderedRoute.splice(evt.oldIndex, 1)[0];
             finalOrderedRoute.splice(evt.newIndex, 0, movedItem);
             
-            // 2. Cek apakah ada Titik Akhir (End Point) yang dikunci oleh user dari Dropdown
-            const endSelectVal = document.getElementById('rute-end-select').value;
+            const endSelectVal = document.getElementById('rute-end-val').value;
             let endPoint = null;
             
-            // 3. Pecah rute: "Terkunci" (dari atas sampai titik drop) dan "Sisa" (titik di bawah drop)
             let lockedRoute = finalOrderedRoute.slice(0, evt.newIndex + 1);
             let unvisited = finalOrderedRoute.slice(evt.newIndex + 1);
             
-            // 4. Jika ada End Point, cabut End Point dari daftar "Sisa" agar tidak ikut dikalkulasi di tengah jalan
-            if (endSelectVal !== "AUTO" && unvisited.length > 0) {
+            if (endSelectVal !== "AUTO" && endSelectVal !== "" && unvisited.length > 0) {
               let endTokoName = selectedStoresToRoute[parseInt(endSelectVal)].nama;
               let endIdx = unvisited.findIndex(t => t.nama === endTokoName);
               if (endIdx > -1) {
@@ -1194,9 +1263,8 @@
               }
             }
 
-            // 5. Kalkulasi Ulang (Nearest Neighbor) khusus untuk daftar "Sisa"
             let newOptimizedTail = [];
-            let currentLoc = lockedRoute[lockedRoute.length - 1]; // Jangkar: Titik yang baru saja di-drop
+            let currentLoc = lockedRoute[lockedRoute.length - 1]; 
             
             while(unvisited.length > 0) {
               let nearestIdx = 0; let minDist = Infinity;
@@ -1209,13 +1277,76 @@
               currentLoc = nextPoint;
             }
 
-            // 6. Jahit kembali: [Rute Terkunci] + [Sisa yang Dioptimalkan] + [End Point]
             finalOrderedRoute = [...lockedRoute, ...newOptimizedTail];
             if (endPoint) finalOrderedRoute.push(endPoint);
 
-            // 7. Render ulang peta dengan garis yang sudah rapi
             renderListAndMap(); 
           },
+        });
+      }
+
+      function hapusTokoDariRute(index) {
+        const tokoTarget = finalOrderedRoute[index];
+        tampilConfirm("Konfirmasi Hapus", `Keluarkan "${tokoTarget.nama}" dari rencana rute hari ini?`, () => {
+            const startVal = document.getElementById('rute-start-val').value;
+            const endVal = document.getElementById('rute-end-val').value;
+
+            // Cek Edge Case: Penghapusan Titik Jangkar
+            if (startVal !== "GPS" && selectedStoresToRoute[parseInt(startVal)] && selectedStoresToRoute[parseInt(startVal)].nama === tokoTarget.nama) {
+              tampilAlert('warning', 'Info', 'Toko ini sedang Anda gunakan sebagai titik MULAI (Start). Dropdown Start akan dikembalikan ke posisi GPS default.');
+              document.getElementById('rute-start-val').value = "GPS";
+              document.getElementById('rute-start-input').value = "📍 Lokasi Saya Saat Ini";
+            }
+            if (endVal !== "AUTO" && endVal !== "" && selectedStoresToRoute[parseInt(endVal)] && selectedStoresToRoute[parseInt(endVal)].nama === tokoTarget.nama) {
+              document.getElementById('rute-end-val').value = "AUTO";
+              document.getElementById('rute-end-input').value = "-- Biarkan Sistem Memilih --";
+            }
+
+            // 1. Hapus dari urutan visual
+            finalOrderedRoute.splice(index, 1);
+
+            // 2. Hapus dari master data
+            let masterIdx = selectedStoresToRoute.findIndex(t => t.nama === tokoTarget.nama);
+            if (masterIdx > -1) selectedStoresToRoute.splice(masterIdx, 1);
+
+            // 3. Bangun ulang dropdown start
+            let startArr = [];
+            if (userGpsForRoute) startArr.push({label: userGpsForRoute.nama, value: "GPS"});
+            selectedStoresToRoute.forEach((toko, idx) => {
+              startArr.push({label: toko.nama, value: idx.toString()});
+            });
+            dropdownData['rute-start'] = startArr;
+
+            // Pastikan nilai dropdown start tidak ngawur jika geser index
+            let currentStartVal = document.getElementById('rute-start-val').value;
+            if(currentStartVal !== "GPS" && finalOrderedRoute[0]) {
+               let newStartIdx = startArr.findIndex(s => s.label === finalOrderedRoute[0].nama);
+               if(newStartIdx > -1) {
+                  document.getElementById('rute-start-val').value = startArr[newStartIdx].value;
+                  document.getElementById('rute-start-input').value = startArr[newStartIdx].label;
+               }
+            }
+
+            renderListAndMap();
+
+            // 4. Update dropdown End secara background
+            const newStartVal = document.getElementById('rute-start-val').value;
+            let startPoint = (newStartVal === "GPS" && userGpsForRoute) ? userGpsForRoute : selectedStoresToRoute[parseInt(newStartVal)];
+            if (startPoint) {
+              let storesWithDist = selectedStoresToRoute.map((toko, idx) => {
+                let calc = hitungJarakWaktu(startPoint.lat, startPoint.lng, toko.lat, toko.lng);
+                return { ...toko, originalIdx: idx, jarak: calc.mentah, labelDist: `${calc.km}km / ${calc.menit}mnt` };
+              });
+              storesWithDist.sort((a, b) => b.jarak - a.jarak);
+              
+              let endArr = [{label: "-- Biarkan Sistem Memilih --", value: "AUTO"}];
+              storesWithDist.forEach(toko => {
+                 if(toko.nama !== startPoint.nama) {
+                   endArr.push({label: toko.nama, value: toko.originalIdx.toString(), extraText: toko.labelDist});
+                 }
+              });
+              dropdownData['rute-end'] = endArr;
+            }
         });
       }
 
@@ -1240,7 +1371,6 @@
           for (let i = 0; i < data.route.length; i += chunkSize) {
             const chunk = data.route.slice(i, i + chunkSize);
             
-            // Menggunakan format Maps resmi untuk memaksa masuk Mode Navigasi Turn-by-Turn
             let origin = `${chunk[0].lat},${chunk[0].lng}`;
             let dest = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
             let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving&dir_action=navigate`;
@@ -1272,11 +1402,14 @@
         document.getElementById('routing-dashboard-section').classList.add('hidden');
         currentMode = "laporan"; document.getElementById('laporan-section').classList.remove('hidden');
         
-        // Bypass Dropdown & Inject Data Paksa
-        document.getElementById('sales-dropdown').innerHTML = `<option value="${saved.sales}">${saved.sales}</option>`;
+        // Mem-Bypass Input Manual ke Teks Toko Rute
+        document.getElementById('laporan-sales-val').value = saved.sales;
+        document.getElementById('laporan-sales-input').value = saved.sales;
         document.getElementById('form-lanjutan-laporan').classList.remove('hidden');
-        document.getElementById('toko-search').value = target.nama; document.getElementById('toko-search').disabled = true;
-        document.getElementById('toko-input').value = target.nama;
+        
+        document.getElementById('laporan-toko-val').value = target.nama;
+        document.getElementById('laporan-toko-input').value = target.nama;
+        document.getElementById('laporan-toko-input').disabled = true; 
         
         stokLaluAktif = parseInt(target.stokLalu, 10) || 0;
         let lbl = document.getElementById('label-sisa-telur');
@@ -1291,22 +1424,22 @@
       }
 
       function resetAndGoDashboardRute() {
-        document.getElementById('toko-search').value = ""; document.getElementById('toko-input').value = ""; document.getElementById('sisa-telur').value = "";
+        document.getElementById('laporan-toko-input').value = ""; document.getElementById('laporan-toko-val').value = ""; document.getElementById('sisa-telur').value = "";
         document.getElementById('label-sisa-telur').textContent = "Sisa Telur (Butir):"; document.getElementById('total-setoran').value = ""; document.getElementById('jumlah-restock').value = "";
         document.getElementById('keterangan').value = ""; stokLaluAktif = 0;
         document.getElementById('konfirmasi-section').classList.add('hidden');
         document.getElementById('result-container').classList.add('hidden');
         document.getElementById('laporan-section').classList.add('hidden');
         document.getElementById('form-lanjutan-laporan').classList.add('hidden');
-        cekRuteAktif(); // Panggil ulang untuk re-render status coret
+        cekRuteAktif(); 
       }
 
       function akhiriRute() {
-        if(confirm("Yakin ingin mengakhiri rute ini? Pastikan semua tugas sudah di-Lapor!")) {
+        tampilConfirm("Akhiri Rute", "Yakin ingin mengakhiri rute ini? Pastikan semua tugas sudah di-Lapor!", () => {
           localStorage.removeItem('eggo_rute_aktif');
           document.getElementById('routing-dashboard-section').classList.add('hidden');
           document.getElementById('home-section').classList.remove('hidden');
-        }
+        });
       }
     </script>
   </body>
