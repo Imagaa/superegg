@@ -264,7 +264,6 @@
       let currentTimestamp = "";
       let originalImage = new Image();
       let geoLat = 0; let geoLong = 0;
-      let globalApiUrl = ""; 
       let stokLaluAktif = 0; 
       
       // PETA & WARNA
@@ -295,28 +294,27 @@
       }
       function tutupAlert() { document.getElementById('custom-alert').classList.remove('show'); }
 
-      async function getApiUrl() {
-        if(globalApiUrl !== "") return globalApiUrl; 
-        try {
-          const res = await fetch('/api/config');
-          if (!res.ok) throw new Error("Gagal load environment vercel");
-          const data = await res.json();
-          globalApiUrl = data.url;
-          return globalApiUrl;
-        } catch(err) {
-          tampilAlert('error', 'Konfigurasi Server Gagal', 'Environment URL API gagal dimuat.');
-          return null;
-        }
-      }
-
+      // KODE BARU (Lebih ringkas dan aman):
       async function jalankanFetchAPI(actionName, payloadData = {}) {
-        const targetUrl = await getApiUrl();
-        if(!targetUrl) throw new Error("API URL Kosong");
-        const response = await fetch(targetUrl, {
-          method: "POST",
-          body: JSON.stringify({ action: actionName, data: payloadData })
-        });
-        return await response.json();
+        try {
+          // Sekarang frontend hanya menembak endpoint Vercel lokal kita sendiri
+          const response = await fetch('/api/proxy', {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json" // Beri tahu Vercel bahwa ini adalah JSON
+            },
+            body: JSON.stringify({ action: actionName, data: payloadData })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+          }
+          
+          return await response.json();
+        } catch (err) {
+          console.error("API Error:", err);
+          throw err;
+        }
       }
 
       // --- LOGIKA PETA (CACHE & LOKASI LIVE) ---

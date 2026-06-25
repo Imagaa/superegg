@@ -1,23 +1,57 @@
-// GERBANG UTAMA API (Menerima Request dari Vercel)
+// GERBANG UTAMA API (Menerima Request dengan Sistem Antrean & Manajemen Cache)
 function doPost(e) {
+  // Inisialisasi Lock Service untuk mencegah Race Condition
+  const lock = LockService.getScriptLock();
+  
   try {
     const requestData = JSON.parse(e.postData.contents);
     const action = requestData.action;
     const payload = requestData.data;
     
     let result;
-    if (action === 'getSalesList') result = getSalesListInternal();
-    else if (action === 'getStoresBySales') result = getStoresBySalesInternal(payload.salesName);
-    else if (action === 'submitLaporan') result = submitLaporanInternal(payload);
-    else if (action === 'submitTitikBaru') result = submitTitikBaruInternal(payload);
-    else if (action === 'submitEndCustomer') result = submitEndCustomerInternal(payload);
-    else if (action === 'getMapData') result = getMapDataInternal();
-    else if (action === 'getRoutingData') result = getRoutingDataInternal(payload);
-    else return respondJSON({ success: false, message: "Action API tidak dikenal." });
+    
+    // Blok Aksi Ambil Data (Read Operations) -> Tidak Perlu Lock, Menggunakan Cache jika ada
+    if (action === 'getSalesList') {
+      result = getSalesListInternal();
+    } else if (action === 'getStoresBySales') {
+      result = getStoresBySalesInternal(payload.salesName);
+    } else if (action === 'getMapData') {
+      result = getMapDataInternal();
+    } else if (action === 'getRoutingData') {
+      result = getRoutingDataInternal(payload);
+    } 
+    
+    // Blok Aksi Kirim Data (Write Operations) -> Wajib Masuk Antrean Lock demi Keamanan Data
+    else if (action === 'submitLaporan' || action === 'submitTitikBaru' || action === 'submitEndCustomer') {
+      // Mencoba mendapatkan kunci selama maksimal 30 detik
+      const hasLock = lock.tryLock(30000);
+      if (!hasLock) {
+        return respondJSON({ success: false, message: "Server sedang sibuk menangani antrean sales lain. Silakan coba klik kirim kembali." });
+      }
+      
+      // Eksekusi penulisan data sesuai aksi
+      if (action === 'submitLaporan') result = submitLaporanInternal(payload);
+      else if (action === 'submitTitikBaru') result = submitTitikBaruInternal(payload);
+      else if (action === 'submitEndCustomer') result = submitEndCustomerInternal(payload);
+      
+      // JIKA INPUT SUKSES -> Hapus Cache Lama agar pembacaan berikutnya langsung memperbarui data (Invalidate Cache)
+      if (result && result.success) {
+        const cache = CacheService.getScriptCache();
+        cache.remove('super_eggo_map_cache');
+        // Hapus juga cache rute sales spesifik jika ada
+        if (payload.sales) cache.remove('routing_cache_' + String(payload.sales).toLowerCase().trim());
+        if (payload.pic) cache.remove('routing_cache_' + String(payload.pic).toLowerCase().trim());
+      }
+    } else {
+      return respondJSON({ success: false, message: "Action API tidak dikenal." });
+    }
     
     return respondJSON(result);
   } catch (error) {
     return respondJSON({ success: false, message: "Gagal memproses API: " + error.toString() });
+  } finally {
+    // Memastikan kunci dilepas dalam kondisi sukses maupun error agar skrip tidak stuck
+    lock.releaseLock();
   }
 }
 
@@ -130,6 +164,16 @@ function getStoresBySalesInternal(salesName) {
 }
 
 function getMapDataInternal() {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'super_eggo_map_cache';
+  
+  // Cek apakah data sudah ada di dalam Cache
+  const cachedData = cache.get(cacheKey);
+  if (cachedData !== null) {
+    return JSON.parse(cachedData); // Langsung kembalikan data dari cache (Sangat Cepat!)
+  }
+  
+  // Jika cache kosong, ambil langsung dari Spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = getSheetByGid(ss, 1772680131); 
   if (!sheet) return [];
@@ -147,6 +191,9 @@ function getMapDataInternal() {
       mapData.push({ nama: namaWarung, lat: lat, lng: lng, pic: pic });
     }
   }
+  
+  // Simpan hasil komputasi ke Cache selama 25 menit (1500 detik) untuk pemanggilan berikutnya
+  cache.put(cacheKey, JSON.stringify(mapData), 1500);
   return mapData;
 }
 
@@ -391,39 +438,50 @@ function sinkronisasiFotoLama() {
   Logger.log("Sinkronisasi selesai! Berhasil menyambungkan " + countBerhasil + " foto lama.");
 }
 function getRoutingDataInternal(payload) {
+  const targetSales = String(payload.salesName).trim().toLowerCase();
+  
+  // Jika parameter pencarian standar rute harian biasa (tanpa filter tanggal custom), gunakan Cache
+  const isDefaultFilter = (!payload.startDate && !payload.endDate);
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'routing_cache_' + targetSales;
+  
+  if (isDefaultFilter) {
+    const cachedRouting = cache.get(cacheKey);
+    if (cachedRouting !== null) {
+      return { success: true, data: JSON.parse(cachedRouting) };
+    }
+  }
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const pengirimanSheet = getSheetByGid(ss, 1790905023);
   const masterSheet = getSheetByGid(ss, 1772680131);
   
   if (!pengirimanSheet || !masterSheet) return { success: false, message: "Tab tidak ditemukan" };
   
-  const targetSales = String(payload.salesName).trim().toLowerCase();
   const startDate = payload.startDate ? new Date(payload.startDate) : null;
   const endDate = payload.endDate ? new Date(payload.endDate) : null;
-  if (endDate) endDate.setHours(23, 59, 59, 999); // Kunci hingga jam 23:59 batas akhir
+  if (endDate) endDate.setHours(23, 59, 59, 999); 
   
   const pengirimanData = pengirimanSheet.getDataRange().getValues();
   const masterData = masterSheet.getDataRange().getValues();
   
-  // MAPPING DATA KOORDINAT MASTER
   const masterCoords = new Map();
   for (let i = 1; i < masterData.length; i++) {
-    let displayToko = String(masterData[i][4] || "").trim(); // Kolom E (Display)
-    let lat = parseFloat(masterData[i][5]); // Kolom F
-    let lng = parseFloat(masterData[i][6]); // Kolom G
+    let displayToko = String(masterData[i][4] || "").trim(); 
+    let lat = parseFloat(masterData[i][5]); 
+    let lng = parseFloat(masterData[i][6]); 
     if (displayToko !== "") {
       masterCoords.set(displayToko, { lat: lat, lng: lng });
     }
   }
   
-  // FILTERING & JOIN PENGIRIMAN
   const validStores = new Map();
   for (let i = 1; i < pengirimanData.length; i++) {
-    let tglTransaksi = new Date(pengirimanData[i][0]); // Kolom A
-    let tokoPengiriman = String(pengirimanData[i][2] || "").trim(); // Kolom C
+    let tglTransaksi = new Date(pengirimanData[i][0]); 
+    let tokoPengiriman = String(pengirimanData[i][2] || "").trim(); 
     let picPengiriman = String(pengirimanData[i][5] || "").trim().toLowerCase();  
     let statusBayar = String(pengirimanData[i][13] || "").trim().toLowerCase(); 
-    let stokLalu = pengirimanData[i][10]; // Kolom K
+    let stokLalu = pengirimanData[i][10]; 
     
     let isDateValid = true;
     if (startDate && endDate && !isNaN(tglTransaksi.getTime())) {
@@ -445,6 +503,11 @@ function getRoutingDataInternal(payload) {
   
   let resultArr = Array.from(validStores.values()).sort((a, b) => a.nama.localeCompare(b.nama));
   if (resultArr.length === 0) return { success: false, message: "Tidak ada data tagihan/rute untuk rentang kriteria ini." };
+  
+  // Simpan rute default sales ke cache selama 15 menit (900 detik)
+  if (isDefaultFilter) {
+    cache.put(cacheKey, JSON.stringify(resultArr), 900);
+  }
   
   return { success: true, data: resultArr };
 }
