@@ -74,7 +74,6 @@
       .route-title { font-weight: 700; color: var(--primary); font-size: 16px; margin: 0 0 10px 0; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px;}
       .route-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #E5E7EB; }
       .route-item:last-child { border-bottom: none; }
-      .route-item.done span { text-decoration: line-through; color: #9CA3AF; }
       .chk-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; text-align: left;}
       .chk-group input { width: auto; transform: scale(1.3); margin:0;}
       .badge { background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; float:right;}
@@ -114,7 +113,6 @@
   </head>
   <body>
 
-    <!-- Modal Alert Bawaan (Custom) -->
     <div id="custom-alert" class="modal-overlay">
       <div class="modal-content">
         <div id="alert-icon" class="modal-icon"></div>
@@ -124,7 +122,6 @@
       </div>
     </div>
 
-    <!-- Modal Confirm Baru (Custom) -->
     <div id="custom-confirm" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-icon warning">?</div>
@@ -186,7 +183,6 @@
         <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px;">Peta Sebaran Toko yang Belum Lapor:</p>
         <div id="selection-map-preview" style="width: 100%; height: 230px; border-radius: 12px; border: 1.5px solid #E5E7EB; margin-bottom: 15px; z-index: 1;"></div>
         
-        <!-- FITUR BARU: Pencarian dan Tombol Pilih Semua -->
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
           <input type="text" id="search-rute-toko" placeholder="Cari nama toko..." onkeyup="filterCheckboxRute()" style="flex: 1; margin: 0; padding: 10px; font-size: 13px;">
           <button type="button" id="btn-toggle-semua-toko" class="btn-secondary" style="width: 110px; margin: 0; padding: 10px; font-size: 12px;" onclick="toggleSemuaTokoRute()">Hapus Semua</button>
@@ -228,6 +224,7 @@
 
       <div id="routing-dashboard-section" class="hidden">
         <h3 style="margin-top:0; text-align:center; color: var(--primary);">📍 Dashboard Rute Aktif</h3>
+        <p style="font-size: 11.5px; color: var(--text-muted); text-align: center; margin: -5px 0 15px 0; line-height:1.4;">Centang kotak di samping nama toko sebagai penanda lokal bahwa Anda sudah berkunjung.</p>
         <div id="rute-aktif-container"></div>
         <button class="btn-danger" style="margin-top: 20px;" onclick="akhiriRute()">🛑 Akhiri Rute & Hapus Data</button>
       </div>
@@ -358,7 +355,6 @@
       let geoLat = 0; let geoLong = 0;
       let stokLaluAktif = 0; 
       
-      // PETA & WARNA
       let map;
       let markersList = [];
       let globalMapData = [];
@@ -367,9 +363,6 @@
       const colorPalette = ["#EF4444", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#14B8A6"];
       let picColorMap = {}; 
 
-      // ==========================================
-      // MODUL ALERTS DAN CONFIRM MODALS
-      // ==========================================
       function tampilAlert(tipe, judul, pesan, aksiSetelahTutup = null) {
         const modal = document.getElementById('custom-alert');
         const iconBox = document.getElementById('alert-icon');
@@ -405,9 +398,6 @@
       }
       function tutupConfirm() { document.getElementById('custom-confirm').classList.remove('show'); }
 
-      // ==========================================
-      // MODUL CUSTOM DROPDOWN (Ketik untuk Mencari)
-      // ==========================================
       let dropdownData = {
         'laporan-sales': [], 'laporan-toko': [], 'laporan-status': [],
         'titik-sales': [], 'customer-sales': [],
@@ -473,6 +463,10 @@
       });
 
       document.addEventListener("DOMContentLoaded", () => { 
+        // Muat cache peta sejak awal agar pencarian PIC sales rute berfungsi lancar
+        const cachedMap = localStorage.getItem('superEggoMapData');
+        if (cachedMap) { globalMapData = JSON.parse(cachedMap); }
+        
         cekRuteAktif(); 
         
         dropdownData['laporan-status'] = [ {label: "Restock", value: "Restock"}, {label: "Stop", value: "Stop"} ];
@@ -508,9 +502,6 @@
         initCustomDropdown('rute-end', hitungUlangOtomatis);
       });
 
-      // ==========================================
-      // FUNGSI API PROXY SERVER VERCEL
-      // ==========================================
       async function jalankanFetchAPI(actionName, payloadData = {}) {
         try {
           const response = await fetch('/api/proxy', {
@@ -526,9 +517,6 @@
         }
       }
 
-      // ==========================================
-      // LOGIKA PETA (CACHE & LOKASI LIVE)
-      // ==========================================
       function bukaPetaLama() {
         document.getElementById('map-menu-section').classList.add('hidden');
         document.getElementById('peta-section').classList.remove('hidden');
@@ -652,7 +640,7 @@
 
             let marker = L.marker([item.lat, item.lng], {icon: customIcon}).addTo(map);
             marker.bindTooltip(item.nama, { permanent: false, direction: 'top', className: 'map-label', offset: [0, -5] });
-            let googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${item.lat},${item.lng}&travelmode=driving&dir_action=navigate`;
+            let googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}&travelmode=driving&dir_action=navigate`;
             
             marker.bindPopup(`
               <div style="text-align:center;">
@@ -668,9 +656,6 @@
         else map.setView([-7.5666, 110.8166], 13);
       }
 
-      // ==========================================
-      // MENU NAVIGATION & POPULASI DROPDOWN DINAMIS
-      // ==========================================
       function fetchDanIsiSales(prefix, includeAll = false) {
         document.getElementById(prefix + '-input').value = "Memuat data...";
         jalankanFetchAPI('getSalesList').then(res => {
@@ -719,9 +704,6 @@
         } else { document.getElementById('form-lanjutan-laporan').classList.add('hidden'); }
       }
 
-      // ==========================================
-      // TRIGGER KAMERA & VALIDASI FORMULIR
-      // ==========================================
       function triggerKameraLaporan() {
         const toko = document.getElementById('laporan-toko-val').value; const sisa = document.getElementById('sisa-telur').value;
         const setoran = document.getElementById('total-setoran').value; const status = document.getElementById('laporan-status-val').value;
@@ -817,11 +799,8 @@
         }
       }
 
-      // ==========================================
-      // KONFIRMASI REVIEW & WATERMARK KANVAS
-      // ==========================================
       function tampilkanKonfirmasiLaporan() {
-        const toko = document.getElementById('laporan-toko-input').value; // Mengambil Teks Nama untuk Preview
+        const toko = document.getElementById('laporan-toko-input').value; 
         const sisa = document.getElementById('sisa-telur').value;
         const setoran = document.getElementById('total-setoran').value; 
         const status = document.getElementById('laporan-status-val').value;
@@ -903,9 +882,6 @@
         else if(currentMode === 'customer') document.getElementById('form-lanjutan-customer').classList.remove('hidden');
       }
 
-      // ==========================================
-      // PENGIRIMAN DATA KE SERVER
-      // ==========================================
       function eksekusiKirim() {
         document.getElementById('loading-overlay').classList.remove('hidden');
         document.getElementById('loading-text').textContent = "Upload ke Server...";
@@ -960,7 +936,6 @@
       function resetAndGoHome() {
         if (locationWatchId) { navigator.geolocation.clearWatch(locationWatchId); locationWatchId = null; }
 
-        // Sembunyikan semua section secara paksa (Mencegah fitur tersangkut)
         const sectionsToHide = ['laporan-section', 'titik-baru-section', 'customer-section', 'peta-section', 'konfirmasi-section', 'result-container', 'form-lanjutan-laporan', 'form-lanjutan-titik', 'form-lanjutan-customer', 'map-menu-section', 'routing-setup-section', 'routing-selection-section', 'routing-visual-section', 'routing-dashboard-section'];
         sectionsToHide.forEach(id => {
           let el = document.getElementById(id);
@@ -969,14 +944,12 @@
         
         document.getElementById('home-section').classList.remove('hidden');
         
-        // Bersihkan Custom Select Inputs & Values
         const prefixes = ['laporan-sales', 'laporan-toko', 'laporan-status', 'titik-sales', 'customer-sales', 'peta-pic', 'peta-toko', 'rute-sales', 'rute-start', 'rute-end'];
         prefixes.forEach(p => {
             let inp = document.getElementById(p + '-input'); let hid = document.getElementById(p + '-val');
             if(inp) inp.value = ""; if(hid) hid.value = "";
         });
 
-        // Reset Inputs Teks
         document.getElementById('sisa-telur').value = ""; document.getElementById('label-sisa-telur').textContent = "Sisa Telur (Butir):"; 
         document.getElementById('total-setoran').value = ""; document.getElementById('jumlah-restock').value = ""; document.getElementById('keterangan').value = ""; 
         document.getElementById('tb-nama').value = ""; document.getElementById('tb-pemilik').value = ""; document.getElementById('tb-hp').value = "";
@@ -1027,7 +1000,6 @@
               const container = document.getElementById('rute-checkbox-container');
               container.innerHTML = "";
               
-              // Reset Fitur Search dan Toggle Semua Toko
               const searchInp = document.getElementById('search-rute-toko');
               if(searchInp) searchInp.value = "";
               const btnToggle = document.getElementById('btn-toggle-semua-toko');
@@ -1067,11 +1039,9 @@
       function toggleSemuaTokoRute() {
         const btn = document.getElementById('btn-toggle-semua-toko');
         const checkboxes = document.querySelectorAll('#rute-checkbox-container input[type="checkbox"]');
-        
         let isCheckAll = btn.textContent === "Pilih Semua";
         
         checkboxes.forEach(chk => {
-          // Terapkan aksi hanya pada list yang tidak disembunyikan oleh kolom pencarian
           const parentGroup = chk.closest('.chk-group');
           if(parentGroup && parentGroup.style.display !== 'none') {
             chk.checked = isCheckAll;
@@ -1304,8 +1274,8 @@
           handle: '.drag-handle',
           animation: 150,
           ghostClass: 'sortable-ghost',
-          delay: 100,             // Sensitivitas sentuhan mobile
-          delayOnTouchOnly: true, // Hanya berlaku delay di HP agar tidak bentrok dengan scroll
+          delay: 100,             
+          delayOnTouchOnly: true, 
           onEnd: function (evt) {
             const movedItem = finalOrderedRoute.splice(evt.oldIndex, 1)[0];
             finalOrderedRoute.splice(evt.newIndex, 0, movedItem);
@@ -1426,27 +1396,55 @@
           for (let i = 0; i < data.route.length; i += chunkSize) {
             const chunk = data.route.slice(i, i + chunkSize);
             
-            let origin = `${chunk[0].lat},${chunk[0].lng}`;
-            let dest = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
-            let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving&dir_action=navigate`;
-            
-            if(chunk.length > 2) {
-              let waypoints = chunk.slice(1, chunk.length-1).map(t => `${t.lat},${t.lng}`).join('|');
-              urlMaps += `&waypoints=${waypoints}`;
+            // PERBAIKAN BUG 1: Logika Origin Estafet dan My Location
+            let originStr = "";
+            if (i === 0) {
+              originStr = "My+Location";
+            } else {
+              let prevToko = data.route[i-1];
+              originStr = `${prevToko.lat},${prevToko.lng}`;
             }
-
+            
+            let destStr = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
+            let waypointsArr = chunk.slice(0, chunk.length-1).map(t => `${t.lat},${t.lng}`);
+            let waypointsStr = waypointsArr.join('|');
+            
+            let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${originStr}&destination=${destStr}&waypoints=${waypointsStr}&travelmode=driving&dir_action=navigate`;
+            
             let chunkHtml = `<div class="route-card"><div class="route-title">Sektor ${Math.floor(i/chunkSize)+1} <span class="badge">${chunk.length} Titik</span></div>`;
             chunkHtml += `<a href="${urlMaps}" target="_blank" style="text-decoration:none;"><button class="btn-primary" style="margin-bottom:15px; padding:10px;">🚗 Buka Navigasi (Sektor ${Math.floor(i/chunkSize)+1})</button></a>`;
             
             chunk.forEach((toko, chunkIdx) => {
               let globalIdx = i + chunkIdx;
-              let isDone = toko.done ? "done" : "";
-              let btn = toko.done ? `<span style="font-size:12px; color:var(--success); font-weight:600;">✔ Beres</span>` : `<button class="btn-success" style="width:auto; padding:6px 12px; font-size:12px; margin:0;" onclick="laporDariRute(${globalIdx})">📝 Lapor</button>`;
-              chunkHtml += `<div class="route-item ${isDone}"><div><span style="font-weight:600; font-size:14px; color:#1F2937;">${globalIdx+1}. ${toko.nama}</span></div>${btn}</div>`;
+              let isDone = toko.done;
+              let isVisited = toko.visited; // Fitur Ceklis Lokal Baru
+              
+              let textColor = isDone ? "#9CA3AF" : (isVisited ? "#6B7280" : "#1F2937");
+              let textDecor = (isDone || isVisited) ? "line-through" : "none";
+              
+              let chkHtml = `<input type="checkbox" ${isVisited || isDone ? "checked" : ""} ${isDone ? "disabled" : ""} onchange="toggleVisitedRute(${globalIdx})" style="width:18px; height:18px; margin:0; flex-shrink:0;">`;
+              
+              let btn = isDone ? `<span style="font-size:12px; color:var(--success); font-weight:600;">✔ Dilaporkan</span>` : `<button class="btn-success" style="width:auto; padding:6px 12px; font-size:12px; margin:0;" onclick="laporDariRute(${globalIdx})">📝 Lapor</button>`;
+              
+              chunkHtml += `<div class="route-item" style="gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                  ${chkHtml}
+                  <span style="font-weight:600; font-size:14px; color:${textColor}; text-decoration:${textDecor}; line-height:1.2;">${globalIdx+1}. ${toko.nama}</span>
+                </div>
+                ${btn}
+              </div>`;
             });
             container.innerHTML += chunkHtml + `</div>`;
           }
         }
+      }
+
+      // FUNGSI BARU: Simpan status centang kunjungan lokal
+      function toggleVisitedRute(globalIdx) {
+        const saved = JSON.parse(localStorage.getItem('eggo_rute_aktif'));
+        saved.route[globalIdx].visited = !saved.route[globalIdx].visited;
+        localStorage.setItem('eggo_rute_aktif', JSON.stringify(saved));
+        cekRuteAktif(); 
       }
 
       function laporDariRute(globalIdx) {
@@ -1457,8 +1455,15 @@
         document.getElementById('routing-dashboard-section').classList.add('hidden');
         currentMode = "laporan"; document.getElementById('laporan-section').classList.remove('hidden');
         
-        document.getElementById('laporan-sales-val').value = saved.sales;
-        document.getElementById('laporan-sales-input').value = saved.sales;
+        // PERBAIKAN BUG 2: Mencari PIC asli jika Sales = Semua Sales
+        let trueSales = saved.sales;
+        if (trueSales === "Semua") {
+           let foundMapData = globalMapData.find(m => m.nama === target.nama);
+           if (foundMapData && foundMapData.pic) trueSales = foundMapData.pic;
+        }
+        
+        document.getElementById('laporan-sales-val').value = trueSales;
+        document.getElementById('laporan-sales-input').value = trueSales;
         document.getElementById('form-lanjutan-laporan').classList.remove('hidden');
         
         document.getElementById('laporan-toko-val').value = target.nama;
