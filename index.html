@@ -947,7 +947,8 @@
         const prefixes = ['laporan-sales', 'laporan-toko', 'laporan-status', 'titik-sales', 'customer-sales', 'peta-pic', 'peta-toko', 'rute-sales', 'rute-start', 'rute-end'];
         prefixes.forEach(p => {
             let inp = document.getElementById(p + '-input'); let hid = document.getElementById(p + '-val');
-            if(inp) inp.value = ""; if(hid) hid.value = "";
+            if(inp) { inp.value = ""; inp.disabled = false; } // Membuka paksa semua kunci
+            if(hid) hid.value = "";
         });
 
         document.getElementById('sisa-telur').value = ""; document.getElementById('label-sisa-telur').textContent = "Sisa Telur (Butir):"; 
@@ -1450,20 +1451,27 @@
         document.getElementById('routing-dashboard-section').classList.add('hidden');
         currentMode = "laporan"; document.getElementById('laporan-section').classList.remove('hidden');
         
-        // PERBAIKAN BUG 2: Mencari PIC asli jika Sales = Semua Sales
         let trueSales = saved.sales;
         if (trueSales === "Semua") {
            let foundMapData = globalMapData.find(m => m.nama === target.nama);
            if (foundMapData && foundMapData.pic) trueSales = foundMapData.pic;
         }
         
+        // INJEKSI DATA & KUNCI MUTLAK SALES
         document.getElementById('laporan-sales-val').value = trueSales;
         document.getElementById('laporan-sales-input').value = trueSales;
+        document.getElementById('laporan-sales-input').disabled = true; 
+        
         document.getElementById('form-lanjutan-laporan').classList.remove('hidden');
         
+        // INJEKSI DATA & KUNCI MUTLAK TOKO
         document.getElementById('laporan-toko-val').value = target.nama;
         document.getElementById('laporan-toko-input').value = target.nama;
         document.getElementById('laporan-toko-input').disabled = true; 
+        
+        // PERTAHANAN CUSTOM DROPDOWN: Isi array agar tidak dihapus otomatis saat blur/tersentuh
+        dropdownData['laporan-sales'] = [{label: trueSales, value: trueSales}];
+        dropdownData['laporan-toko'] = [{label: target.nama, value: target.nama, dataObj: target}];
         
         stokLaluAktif = parseInt(target.stokLalu, 10) || 0;
         let lbl = document.getElementById('label-sisa-telur');
@@ -1478,7 +1486,9 @@
       }
 
       function resetAndGoDashboardRute() {
-        document.getElementById('laporan-toko-input').value = ""; document.getElementById('laporan-toko-val').value = ""; document.getElementById('sisa-telur').value = "";
+        document.getElementById('laporan-sales-input').value = ""; document.getElementById('laporan-sales-val').value = ""; document.getElementById('laporan-sales-input').disabled = false;
+        document.getElementById('laporan-toko-input').value = ""; document.getElementById('laporan-toko-val').value = ""; document.getElementById('laporan-toko-input').disabled = false;
+        document.getElementById('sisa-telur').value = "";
         document.getElementById('label-sisa-telur').textContent = "Sisa Telur (Butir):"; document.getElementById('total-setoran').value = ""; document.getElementById('jumlah-restock').value = "";
         document.getElementById('keterangan').value = ""; stokLaluAktif = 0;
         document.getElementById('konfirmasi-section').classList.add('hidden');
