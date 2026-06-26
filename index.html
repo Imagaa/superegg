@@ -1396,14 +1396,9 @@
           for (let i = 0; i < data.route.length; i += chunkSize) {
             const chunk = data.route.slice(i, i + chunkSize);
             
-            // PERBAIKAN BUG 1: Logika Origin Estafet dan My Location
-            let originStr = "";
-            if (i === 0) {
-              originStr = "My+Location";
-            } else {
-              let prevToko = data.route[i-1];
-              originStr = `${prevToko.lat},${prevToko.lng}`;
-            }
+            // URL GMAPS: Selalu paksa "Mulai dari Lokasi Saya" untuk setiap sektor, 
+            // tanpa memutus urutan algoritma toko yang sudah berurutan.
+            let originStr = "My+Location";
             
             let destStr = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
             let waypointsArr = chunk.slice(0, chunk.length-1).map(t => `${t.lat},${t.lng}`);
