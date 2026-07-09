@@ -1451,13 +1451,9 @@
         document.getElementById('routing-dashboard-section').classList.add('hidden');
         currentMode = "laporan"; document.getElementById('laporan-section').classList.remove('hidden');
         
-        let trueSales = saved.sales;
-        if (trueSales === "Semua") {
-           let foundMapData = globalMapData.find(m => m.nama === target.nama);
-           if (foundMapData && foundMapData.pic) trueSales = foundMapData.pic;
-        }
+        // PERBAIKAN BUG 2 (Backend Approach): Gunakan PIC asli yang sudah disisipkan oleh server
+        let trueSales = target.pic || saved.sales; 
         
-        // INJEKSI DATA & KUNCI MUTLAK SALES
         document.getElementById('laporan-sales-val').value = trueSales;
         document.getElementById('laporan-sales-input').value = trueSales;
         document.getElementById('laporan-sales-input').disabled = true; 

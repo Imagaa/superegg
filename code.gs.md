@@ -493,11 +493,14 @@ function getRoutingDataInternal(payload) {
     if (statusBayar === 'belum' && (isSemuaSales || picPengiriman === targetSales) && tokoPengiriman !== "" && isDateValid) {
       let coords = masterCoords.get(tokoPengiriman);
       if (coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+        let picAsli = String(pengirimanData[i][5] || "").trim(); // Tarik PIC asli dari kolom F Pengiriman
+
         validStores.set(tokoPengiriman, { 
           nama: tokoPengiriman, 
           lat: coords.lat, 
           lng: coords.lng, 
-          stokLalu: stokLalu 
+          stokLalu: stokLalu,
+          pic: picAsli // Sisipkan PIC asli ke payload
         });
       }
     }
