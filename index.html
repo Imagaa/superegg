@@ -1397,18 +1397,27 @@
           for (let i = 0; i < data.route.length; i += chunkSize) {
             const chunk = data.route.slice(i, i + chunkSize);
             
-            // URL GMAPS: Selalu paksa "Mulai dari Lokasi Saya" untuk setiap sektor, 
-            // tanpa memutus urutan algoritma toko yang sudah berurutan.
-            let originStr = "My+Location";
+            // URL GMAPS: Filter dinamis hanya untuk toko yang BELUM dikunjungi (visited) dan BELUM dilaporkan (done)
+            const unvisitedChunk = chunk.filter(t => !t.visited && !t.done);
             
-            let destStr = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lng}`;
-            let waypointsArr = chunk.slice(0, chunk.length-1).map(t => `${t.lat},${t.lng}`);
-            let waypointsStr = waypointsArr.join('|');
-            
-            let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${originStr}&destination=${destStr}&waypoints=${waypointsStr}&travelmode=driving&dir_action=navigate`;
+            let btnNavigasiHtml = "";
+            if (unvisitedChunk.length > 0) {
+              let originStr = "My+Location";
+              let destStr = `${unvisitedChunk[unvisitedChunk.length-1].lat},${unvisitedChunk[unvisitedChunk.length-1].lng}`;
+              let waypointsArr = unvisitedChunk.slice(0, unvisitedChunk.length-1).map(t => `${t.lat},${t.lng}`);
+              let waypointsStr = waypointsArr.join('|');
+              
+              // Format URL resmi Google Maps API
+              let urlMaps = `https://www.google.com/maps/dir/?api=1&origin=${originStr}&destination=${destStr}&waypoints=${waypointsStr}&travelmode=driving&dir_action=navigate`;
+              
+              btnNavigasiHtml = `<a href="${urlMaps}" target="_blank" style="text-decoration:none;"><button class="btn-primary" style="margin-bottom:15px; padding:10px;">🚗 Buka Navigasi (Sektor ${Math.floor(i/chunkSize)+1})</button></a>`;
+            } else {
+              // Jika semua toko di sektor ini sudah dicentang / dilaporkan
+              btnNavigasiHtml = `<button class="btn-secondary" style="margin-bottom:15px; padding:10px; cursor:not-allowed;" disabled>✅ Sektor Selesai</button>`;
+            }
             
             let chunkHtml = `<div class="route-card"><div class="route-title">Sektor ${Math.floor(i/chunkSize)+1} <span class="badge">${chunk.length} Titik</span></div>`;
-            chunkHtml += `<a href="${urlMaps}" target="_blank" style="text-decoration:none;"><button class="btn-primary" style="margin-bottom:15px; padding:10px;">🚗 Buka Navigasi (Sektor ${Math.floor(i/chunkSize)+1})</button></a>`;
+            chunkHtml += btnNavigasiHtml;
             
             chunk.forEach((toko, chunkIdx) => {
               let globalIdx = i + chunkIdx;
